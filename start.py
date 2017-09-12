@@ -1,7 +1,5 @@
 #!/usr/bin/python3
 """ start.py:
-    Master start routine for the RpiHome application.  Starts each service in
-    a separate shell in an order that prevents loss of data between services
 """
 
 # Import Required Libraries (Standard, Third Party, Local) ********************
@@ -23,5 +21,6 @@ __email__ = "csmaue@gmail.com"
 __status__ = "Development"
 
 
+# Start Service ***************************************************************
 if __name__ == "__main__":
     start_service()
