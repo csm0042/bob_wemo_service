@@ -1,0 +1,7 @@
+Known issues:
+1)  Despite update message being sent to database AND database updating in processed field, still getting delayed,
+    repeat commands going out to the wemo service from the auto service
+2)  Nothing currently in-place to generate log status update (LSU) messages.  This used to work, need to look at an old revision and see why
+    this stopped working
+3)  "try" part of handle_msg_out in the helpers/message_handlers.py is too broad and it's impossible to tell from log what message it errors 
+    out on when a message fails to send.
