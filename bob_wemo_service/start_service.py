@@ -29,10 +29,10 @@ __status__ = "Development"
 
 
 # Application wide objects ****************************************************
-if __name__ == "__main__":
-    SERVICE_CONFIG = ConfigureService('config.ini')
-else:
-    SERVICE_CONFIG = ConfigureService('bob_wemo_service/config.ini')
+parent_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+config_file = os.path.join(parent_path, 'config.ini')
+print("\n\nUsing Config file:\n" + config_file + "\n\n")
+SERVICE_CONFIG = ConfigureService(config_file)
 LOG = SERVICE_CONFIG.get_logger()
 SERVICE_ADDRESSES = SERVICE_CONFIG.get_servers()
 MESSAGE_TYPES = SERVICE_CONFIG.get_message_types()
