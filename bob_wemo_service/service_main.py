@@ -139,7 +139,7 @@ class MainTask(object):
 
             # PERIODIC TASKS
             # Periodically send heartbeats to other services
-            if datetime.datetime.now() >= (self.last_check_hb + datetime.timedelta(seconds=120)):
+            if datetime.datetime.now() >= (self.last_check_hb + datetime.timedelta(seconds=60)):
                 self.destinations = [
                     (self.service_addresses['automation_addr'],
                      self.service_addresses['automation_port'])

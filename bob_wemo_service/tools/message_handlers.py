@@ -83,6 +83,7 @@ class MessageHandler(object):
             if self.msg_out_queue.qsize() > 0:
                 self.log.debug('Pulling next outgoing message from queue')
                 self.msg_to_send = self.msg_out_queue.get_nowait()
+                self.log.info('Preparing to send message: %s', self.msg_to_send)
                 self.log.debug('Extracting msg destination address and port')
                 self.msg_seg_out = self.msg_to_send.split(',')
                 self.log.debug('Opening outgoing connection to %s:%s',
@@ -97,11 +98,11 @@ class MessageHandler(object):
                     self.data_ack = yield from self.reader_out.read(200)
                     self.ack = self.data_ack.decode()
                     self.log.info('Received ACK: %r', self.ack)
-                    if self.ack.split(',')[0] == self.msg_seg_out[0]:
-                        self.log.debug('Successful ACK received')
-                    else:
-                        self.log.debug('Ack received does not match sent '
-                                       'message')
+                    #if self.ack.split(',')[0] == self.msg_seg_out[0]:
+                    #    self.log.debug('Successful ACK received')
+                    #else:
+                    #    self.log.debug('Ack received does not match sent '
+                    #                   'message')
                     self.log.debug('Closing socket')
                     self.writer_out.close()
                 except Exception:
