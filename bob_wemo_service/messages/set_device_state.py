@@ -266,7 +266,7 @@ class SetDeviceStateMessage(object):
     @dev_last_seen.setter
     def dev_last_seen(self, value):
         self._dev_last_seen = is_valid_datetime(
-            self.log,
+            self.log_path,
             value,
             self._dev_last_seen)
         self.log.debug('Device last seen updated to: %s', self._dev_last_seen)
