@@ -96,7 +96,7 @@ class GetDeviceStateMessageACK(object):
 
     @ref.setter
     def ref(self, value):
-        if in_int_range(self.log, value, 100, 999) is True:
+        if in_int_range(self.log_path, value, 100, 999) is True:
             self._ref = str(value)
             self.log.debug('Ref number updated to: %s', self._ref)
         else:
@@ -129,7 +129,7 @@ class GetDeviceStateMessageACK(object):
 
     @dest_port.setter
     def dest_port(self, value):
-        if in_int_range(self.log, value, 10000, 60000) is True:
+        if in_int_range(self.log_path, value, 10000, 60000) is True:
             self._dest_port = str(value)
             self.log.debug('Destination port updated to: %s', self._dest_port)
         else:
@@ -162,7 +162,7 @@ class GetDeviceStateMessageACK(object):
 
     @source_port.setter
     def source_port(self, value):
-        if in_int_range(self.log, value, 10000, 60000) is True:
+        if in_int_range(self.log_path, value, 10000, 60000) is True:
             self._source_port = str(value)
             self.log.debug('Source port updated to: %s', self._source_port)
         else:
@@ -178,7 +178,7 @@ class GetDeviceStateMessageACK(object):
 
     @msg_type.setter
     def msg_type(self, value):
-        if in_int_range(self.log, value, 100, 999) is True:
+        if in_int_range(self.log_path, value, 100, 999) is True:
             self._msg_type = str(value)
             self.log.debug('Message type updated to: %s', self._msg_type)
         else:
