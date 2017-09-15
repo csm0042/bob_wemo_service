@@ -39,6 +39,7 @@ class MessageHandler(object):
         self.writer_out = None
         self.ack = str()
         self.data_ack = str()
+        self.sleep_time = 0.2
 
     # Incoming message handler ************************************************
     @asyncio.coroutine
@@ -80,7 +81,9 @@ class MessageHandler(object):
     def handle_msg_out(self):
         """ task to handle outgoing messages """
         while True:
+            self.sleep_time = 0.2
             if self.msg_out_queue.qsize() > 0:
+                self.sleep_time = 0.05
                 self.log.debug('Pulling next outgoing message from queue')
                 self.msg_to_send = self.msg_out_queue.get_nowait()
                 self.log.info('Preparing to send message: %s', self.msg_to_send)
@@ -98,16 +101,11 @@ class MessageHandler(object):
                     self.data_ack = yield from self.reader_out.read(200)
                     self.ack = self.data_ack.decode()
                     self.log.info('Received ACK: %r', self.ack)
-                    #if self.ack.split(',')[0] == self.msg_seg_out[0]:
-                    #    self.log.debug('Successful ACK received')
-                    #else:
-                    #    self.log.debug('Ack received does not match sent '
-                    #                   'message')
                     self.log.debug('Closing socket')
                     self.writer_out.close()
                 except Exception:
                     self.log.warning('Could not open socket connection to '
                                      'target')
             # Yield to other tasks for a while
-            yield from asyncio.sleep(0.25)
+            yield from asyncio.sleep(self.sleep_time)
 
