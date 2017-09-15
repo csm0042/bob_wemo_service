@@ -4,7 +4,11 @@
 
 # Import Required Libraries (Standard, Third Party, Local) ********************
 import logging
+import os
 import sys
+if __name__ == "__main__":
+    sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from bob_wemo_service.tools.log_support import setup_function_logger
 
 
 # Authorship Info *************************************************************
@@ -20,9 +24,10 @@ __status__ = "Development"
 
 # Class definition ************************************************************
 class RefNum(object):
-    def __init__(self, log):
+    def __init__(self, log_path):
         # Configure logger
-        self.log = log or logging.getLogger(__name__)
+        self.log_path = log_path
+        self.log = setup_function_logger(self.log_path, 'Class_RefNum')
         # Init tags
         self._source = 100
 

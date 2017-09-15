@@ -58,3 +58,34 @@ def setup_log_handlers(name, debug_logfile, info_logfile):
     root.addHandler(console_handler)
     root.debug("logging configured with 3 handlers")
     return root
+
+
+# Logging helper functions ****************************************************
+def setup_function_logger(path, function_name):
+    """ Function to configure a logger for a specific function """
+    logger = logging.getLogger(function_name)
+    logger.setLevel(logging.DEBUG)
+    logger.handlers = []
+    # Check if log path exist, create them if they don't
+    os.makedirs(path, exist_ok=True)
+    # Determine file names
+    logfile = os.path.join(path, function_name + ".log")
+    # Create handlers
+    file_handler = logging.handlers.TimedRotatingFileHandler(
+        logfile, when='d', interval=1, backupCount=7)
+    console_handler = logging.StreamHandler(sys.stdout)       
+    # Set logging levels for each handler
+    console_handler.setLevel(logging.INFO)
+    # Create individual formats for each handler
+    debug_formatter = logging.Formatter(
+        '%(asctime)-25s %(levelname)-10s %(message)s')
+    console_formatter = logging.Formatter(
+        '%(asctime)s - %(levelname)s - %(message)s')
+    # Set formatting options for each handler
+    file_handler.setFormatter(debug_formatter)
+    console_handler.setFormatter(console_formatter)
+    # Add handlers to root logger
+    logger.addHandler(file_handler)
+    logger.addHandler(console_handler)
+    logger.debug("logging configured with 2 handlers")
+    return logger

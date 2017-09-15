@@ -47,6 +47,12 @@ class ConfigureService(object):
         return self.log
 
 
+    def get_logger_path(self):
+        # Set up application logging storage paths
+        self.config_file.read(self.filename)
+        return self.config_file['LOG FILES']['log_file_path']    
+
+
     def get_servers(self):
         # Create dict with all services defined in INI file
         self.config_file.read(self.filename)

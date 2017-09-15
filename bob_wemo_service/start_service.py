@@ -9,6 +9,7 @@ import os
 import sys
 if __name__ == "__main__":
     sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from bob_wemo_service.tools.log_support import setup_function_logger
 from bob_wemo_service.configure import ConfigureService
 from bob_wemo_service.wemo import WemoAPI
 from bob_wemo_service.service_main import MainTask
@@ -33,16 +34,16 @@ parent_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 config_file = os.path.join(parent_path, 'config.ini')
 print("\n\nUsing Config file:\n" + config_file + "\n\n")
 SERVICE_CONFIG = ConfigureService(config_file)
-LOG = SERVICE_CONFIG.get_logger()
+LOG_PATH = SERVICE_CONFIG.get_logger_path()
 SERVICE_ADDRESSES = SERVICE_CONFIG.get_servers()
 MESSAGE_TYPES = SERVICE_CONFIG.get_message_types()
-WEMO_GW = WemoAPI(LOG)
+WEMO_GW = WemoAPI(LOG_PATH)
 
-REF_NUM = RefNum(log=LOG)
+REF_NUM = RefNum(LOG_PATH)
 LOOP = asyncio.get_event_loop()
-COMM_HANDLER = MessageHandler(LOG, LOOP)
+COMM_HANDLER = MessageHandler(LOG_PATH, LOOP)
 MAINTASK = MainTask(
-    LOG,
+    LOG_PATH,
     ref=REF_NUM,
     gw=WEMO_GW,
     msg_in_queue=COMM_HANDLER.msg_in_queue,
@@ -55,56 +56,59 @@ MAINTASK = MainTask(
 # Main ************************************************************************
 def main():
     """ Main application routine """
-    LOG.debug('Starting main')
+    # Configure logger
+    log = setup_function_logger(LOG_PATH, 'Function_Main')
+
+    log.debug('Starting main()')
 
     # Create incoming message server
     try:
-        LOG.debug('Creating incoming message listening server at [%s:%s]',
+        log.debug('Creating incoming message listening server at [%s:%s]',
                   SERVICE_ADDRESSES['wemo_addr'],
                   SERVICE_ADDRESSES['wemo_port'])
         msg_in_server = asyncio.start_server(
             COMM_HANDLER.handle_msg_in,
             host=SERVICE_ADDRESSES['wemo_addr'],
             port=int(SERVICE_ADDRESSES['wemo_port']))
-        LOG.debug('Wrapping servier in future task and scheduling for '
+        log.debug('Wrapping servier in future task and scheduling for '
                   'execution')
         msg_in_task = LOOP.run_until_complete(msg_in_server)
     except Exception:
-        LOG.debug('Failed to create socket listening connection at %s:%s',
+        log.debug('Failed to create socket listening connection at %s:%s',
                   SERVICE_ADDRESSES['wemo_addr'],
                   SERVICE_ADDRESSES['wemo_port'])
         sys.exit()
 
     # Create main task for this service
-    LOG.debug('Scheduling main task for execution')
+    log.debug('Scheduling main task for execution')
     asyncio.ensure_future(MAINTASK.run())
 
     # Create outgoing message task
-    LOG.debug('Scheduling outgoing message task for execution')
+    log.debug('Scheduling outgoing message task for execution')
     asyncio.ensure_future(COMM_HANDLER.handle_msg_out())
 
     # Serve requests until Ctrl+C is pressed
-    LOG.info('Wemo Gateway Service')
-    LOG.info('Serving on {}'.format(msg_in_task.sockets[0].getsockname()))
-    LOG.info('Press CTRL+C to exit')
+    log.info('Wemo Gateway Service')
+    log.info('Serving on {}'.format(msg_in_task.sockets[0].getsockname()))
+    log.info('Press CTRL+C to exit')
     try:
         LOOP.run_forever()
     except asyncio.CancelledError:
-        LOG.info('All tasks have been cancelled')
+        log.info('All tasks have been cancelled')
     except KeyboardInterrupt:
         pass
     finally:
-        LOG.info('Shutting down incoming message server')
+        log.info('Shutting down incoming message server')
         msg_in_server.close()
-        LOG.info('Finding all running tasks to shut down')
+        log.info('Finding all running tasks to shut down')
         pending = asyncio.Task.all_tasks()
-        LOG.info('[%s] Task still running.  Closing them now', str(len(pending)))
+        log.info('[%s] Task still running.  Closing them now', str(len(pending)))
         for i, task in enumerate(pending):
             with suppress(asyncio.CancelledError):
-                LOG.info('Waiting for task [%s] to shut down', i)
+                log.info('Waiting for task [%s] to shut down', i)
                 task.cancel()
                 LOOP.run_until_complete(task)
-        LOG.info('Shutdown complete.  Terminating execution LOOP')
+        log.info('Shutdown complete.  Terminating execution LOOP')
 
     # Terminate the execution LOOP
     LOOP.close()

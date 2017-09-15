@@ -9,6 +9,7 @@ import os
 import sys
 if __name__ == "__main__":
     sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from bob_wemo_service.tools.log_support import setup_function_logger
 from bob_wemo_service.messages.heartbeat import HeartbeatMessage
 from bob_wemo_service.messages.heartbeat_ack import HeartbeatMessageACK
 from bob_wemo_service.messages.get_device_state import GetDeviceStateMessage
@@ -28,15 +29,18 @@ __email__ = "csmaue@gmail.com"
 __status__ = "Development"
 
 
-def create_heartbeat_msg(log, ref_num, destinations, source_addr, source_port, message_types):
+def create_heartbeat_msg(log_path, ref_num, destinations, source_addr, source_port, message_types):
     """ function to create one or more heartbeat messages """
+    # Configure logging for this function
+    log = setup_function_logger(log_path, 'Function_create_heartbeat_msg')
+
     # Initialize result list
     out_msg_list = []
 
     # Generate a heartbeat message for each destination given
     for entry in destinations:
         out_msg = HeartbeatMessage(
-            log=log,
+            log_path,
             ref=ref_num.new(),
             dest_addr=entry[0],
             dest_port=entry[1],
@@ -46,25 +50,28 @@ def create_heartbeat_msg(log, ref_num, destinations, source_addr, source_port, m
         )
         # Load message into output list
         log.debug('Loading completed msg: %s', out_msg.complete)
-        out_msg_list.append(out_msg.complete)
+        out_msg_list.append(copy.copy(out_msg.complete))
 
     # Return response message
     return out_msg_list
 
 
-def process_heartbeat_msg(log, ref_num, msg, message_types):
+def process_heartbeat_msg(log_path, ref_num, msg, message_types):
     """ function to ack wake-up requests to wemo service """
+    # Configure logging for this function
+    log = setup_function_logger(log_path, 'Function_process_heartbeat_msg')
+
     # Initialize result list
     out_msg_list = []
 
     # Map message into wemo wake-up message class
-    message = HeartbeatMessage(log=log)
+    message = HeartbeatMessage(log_path)
     message.complete = msg
 
     # Send response indicating query was executed
     log.debug('Building response message header')
     out_msg = HeartbeatMessageACK(
-        log=log,
+        log_path,
         ref=ref_num.new(),
         dest_addr=message.source_addr,
         dest_port=message.source_port,
@@ -74,7 +81,7 @@ def process_heartbeat_msg(log, ref_num, msg, message_types):
 
     # Load message into output list
     log.debug('Loading completed msg: [%s]', out_msg.complete)
-    out_msg_list.append(out_msg.complete)
+    out_msg_list.append(copy.copy(out_msg.complete))
 
     # Return response message
     return out_msg_list
@@ -82,13 +89,16 @@ def process_heartbeat_msg(log, ref_num, msg, message_types):
 
 # Internal Service Work Subtask - wemo get status *****************************
 @asyncio.coroutine
-def get_wemo_state(log, ref_num, wemo_gw, msg, message_types):
+def get_wemo_state(log_path, ref_num, wemo_gw, msg, message_types):
     """ Function to properly process wemo device status requests """
+    # Configure logging for this function
+    log = setup_function_logger(log_path, 'Function_get_wemo_state')
+
     # Initialize result list
     out_msg_list = []
 
     # Map message into GDS message class
-    message = GetDeviceStateMessage(log=log)
+    message = GetDeviceStateMessage(log_path)
     message.complete = msg    
 
     # Execute Status Update
@@ -107,7 +117,7 @@ def get_wemo_state(log, ref_num, wemo_gw, msg, message_types):
     # Send response indicating query was executed
     log.debug('Building response message header')
     out_msg = GetDeviceStateMessageACK(
-        log=log,
+        log_path,
         ref=ref_num.new(),
         dest_addr=message.source_addr,
         dest_port=message.source_port,
@@ -120,7 +130,7 @@ def get_wemo_state(log, ref_num, wemo_gw, msg, message_types):
 
     # Load message into output list
     log.debug('Loading completed msg: [%s]', out_msg.complete)
-    out_msg_list.append(out_msg.complete)
+    out_msg_list.append(copy.copy(out_msg.complete))
 
     # Return response message
     return out_msg_list
@@ -128,13 +138,16 @@ def get_wemo_state(log, ref_num, wemo_gw, msg, message_types):
 
 # Internal Service Work Subtask - wemo turn on ********************************
 @asyncio.coroutine
-def set_wemo_state(log, ref_num, wemo_gw, msg, message_types):
+def set_wemo_state(log_path, ref_num, wemo_gw, msg, message_types):
     """ Function to set state of wemo device to "on" """
+    # Configure logging for this function
+    log = setup_function_logger(log_path, 'Function_set_wemo_state')
+
     # Initialize result list
     out_msg_list = []
 
     # Map message into CCS message class
-    message = SetDeviceStateMessage(log=log)
+    message = SetDeviceStateMessage(log_path)
     message.complete = msg
 
     # Execute wemo on commands
@@ -166,7 +179,7 @@ def set_wemo_state(log, ref_num, wemo_gw, msg, message_types):
     # Send response indicating command was executed
     log.debug('Building response message')
     out_msg = SetDeviceStateMessageACK(
-        log=log,
+        log_path,
         ref=ref_num.new(),
         dest_addr=message.source_addr,
         dest_port=message.source_port,
@@ -179,7 +192,7 @@ def set_wemo_state(log, ref_num, wemo_gw, msg, message_types):
 
     # Load message into output list
     log.debug('Loading completed msg: [%s]', out_msg.complete)
-    out_msg_list.append(out_msg.complete)
+    out_msg_list.append(copy.copy(out_msg.complete))
 
     # Return response message
     return out_msg_list

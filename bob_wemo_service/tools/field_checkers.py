@@ -10,6 +10,7 @@ import os
 import sys
 if __name__ == "__main__":
     sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from bob_wemo_service.tools.log_support import setup_function_logger
 from bob_wemo_service.tools.ipv4_help import check_ipv4
 
 
@@ -32,8 +33,12 @@ DATETIME_REGEX = r'\b([0-9][0-9][0-9][0-9])-((0[0-9])|(1[0-2]))-(([0-2][0-9])|(3
 
 
 # In Integer range checker ****************************************************
-def in_int_range(log, value, low_limit, high_limit):
+def in_int_range(log_path, value, low_limit, high_limit):
+    # Configure loggers
+    log = setup_function_logger(log_path, 'Function_in_int_range')
+    
     if isinstance(value, str):
+        log.debug('Checking string input value: %s', value)
         try:
             if int(low_limit) <= int(value) <= int(high_limit):
                 return True
@@ -42,6 +47,7 @@ def in_int_range(log, value, low_limit, high_limit):
         except Exception:
             return False
     if isinstance(value, int):
+        log.debug('Checking integer input value: %d', value)
         if int(low_limit) <= value <= int(high_limit):
             return True
         else:
@@ -49,9 +55,12 @@ def in_int_range(log, value, low_limit, high_limit):
 
 
 # Valid datetime checker ******************************************************
-def is_valid_datetime(log, value, initial_value):
+def is_valid_datetime(log_path, value, initial_value):
     # When a valid datetime is provided, return its string equivalent,
     # truncated to the seconds field
+    # Configure loggers
+    log = setup_function_logger(log_path, 'Function_is_valid_datetime')
+
     if isinstance(value, datetime.datetime):
         log.debug('Input value matches datetime format: %s', value)
         result = (str(value))[:19]

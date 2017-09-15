@@ -9,6 +9,7 @@ import os
 import sys
 if __name__ == "__main__":
     sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from bob_wemo_service.tools.log_support import setup_function_logger
 from bob_wemo_service.tools.ipv4_help import check_ipv4
 from bob_wemo_service.tools.field_checkers import in_int_range
 from bob_wemo_service.tools.field_checkers import is_valid_datetime
@@ -28,9 +29,11 @@ __status__ = "Development"
 # Message Class Definition ****************************************************
 class GetDeviceStateMessageACK(object):
     """ Log Status Update message class and methods """
-    def __init__(self, log=None, **kwargs):
-        # Configure logger
-        self.log = log or logging.getLogger(__name__)
+    def __init__(self, log_path, **kwargs):
+        # Configure loggers
+        self.log_path = log_path
+        self.log = setup_function_logger(self.log_path, 'Class_GetDeviceStateMessageACK')
+
         self._ref = str()
         self._dest_addr = str()
         self._dest_port = str()
