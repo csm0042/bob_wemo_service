@@ -91,7 +91,7 @@ class MainTask(object):
 
             # INCOMING MESSAGE HANDLING
             if self.msg_in_queue.qsize() > 0:
-                self.sleep_time = 0.05
+                self.sleep_time = 0.01
                 self.logger.debug('Getting Incoming message from queue')
                 self.next_msg = self.msg_in_queue.get_nowait()
                 self.logger.debug('Message pulled from queue: [%s]', self.next_msg)
