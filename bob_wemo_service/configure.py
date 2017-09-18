@@ -6,11 +6,9 @@
 # Import Required Libraries (Standard, Third Party, Local) ********************
 import configparser
 import logging
+import logging.handlers
 import os
 import sys
-if __name__ == "__main__":
-    sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from bob_wemo_service.tools.log_support import setup_log_handlers
 
 
 # Authorship Info *************************************************************
@@ -39,18 +37,35 @@ class ConfigureService(object):
     def get_logger(self):
         # Set up application logging
         self.config_file.read(self.filename)
-        self.log = setup_log_handlers(
-            __file__,
-            self.config_file['LOG FILES']['wemo_debug_log_file'],
-            self.config_file['LOG FILES']['wemo_info_log_file'])
+        self.log_path = self.config_file['LOG FILES']['log_file_path']
+        self.logger = logging.getLogger('master')
+        self.logger.setLevel(logging.DEBUG)
+        self.logger.handlers = []
+        os.makedirs(self.log_path, exist_ok=True)
+        # Console handler
+        self.handlers = []
+        self.ch = logging.StreamHandler(sys.stdout)
+        self.ch.setLevel(logging.INFO)
+        self.cf = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
+        self.ch.setFormatter(self.cf)
+        self.logger.addHandler(self.ch)
+        self.logger.info('Console logger handler created and applied')
+        # File handler
+        self.fh = logging.handlers.TimedRotatingFileHandler(
+            os.path.join(self.log_path, "_Debug.log"),
+            when='d',
+            interval=1,
+            backupCount=4
+        )
+        self.fh.setLevel(logging.DEBUG)
+        self.ff = logging.Formatter(
+            '%(asctime)-25s %(levelname)-10s '
+            '%(funcName)-22s %(message)s'
+        )
+        self.fh.setFormatter(self.ff)
+        self.logger.addHandler(self.fh)
         # Return configured objects to main program
-        return self.log
-
-
-    def get_logger_path(self):
-        # Set up application logging storage paths
-        self.config_file.read(self.filename)
-        return self.config_file['LOG FILES']['log_file_path']    
+        return self.logger
 
 
     def get_servers(self):

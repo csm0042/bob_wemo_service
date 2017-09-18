@@ -6,7 +6,6 @@
 import logging
 import re
 import sys
-from bob_wemo_service.tools.log_support import setup_function_logger
 
 
 # Authorship Info *************************************************************
@@ -21,9 +20,12 @@ __status__ = "Development"
 
 
 # IPv4 Format helper function *************************************************
-def check_ipv4(address):
+def check_ipv4(address, logger=None):
     """ simple function used to determine if the contents of a string are
     compatable with an ipv4 address """
+    # Configure loggers
+    logger = logger or logging.getLogger(__name__)
+
     ipv4_regex = r'\b(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.' \
                  r'(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.' \
                  r'(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.' \
@@ -39,19 +41,3 @@ def check_ipv4(address):
         return True
     else:
         return False
-
-
-if __name__ == "__main__":
-    root = logging.getLogger()
-    handler = logging.StreamHandler(sys.stdout)
-    handler.setLevel(logging.DEBUG)
-    root.addHandler(handler)
-
-    print("\n\nTesting check_ipv4 function")
-    for i in range(250, 260, 1):
-        addr = "192.168.1." + str(i)
-        if check_ipv4(addr) is True:
-            print(addr + " is valid")
-        else:
-            print(addr + " is not valid")
-    print("\n\n")

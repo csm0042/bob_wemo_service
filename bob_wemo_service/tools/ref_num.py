@@ -8,7 +8,6 @@ import os
 import sys
 if __name__ == "__main__":
     sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from bob_wemo_service.tools.log_support import setup_function_logger
 
 
 # Authorship Info *************************************************************
@@ -24,29 +23,28 @@ __status__ = "Development"
 
 # Class definition ************************************************************
 class RefNum(object):
-    def __init__(self, log_path):
-        # Configure logger
-        self.log_path = log_path
-        self.log = setup_function_logger(self.log_path, 'Class_RefNum')
+    def __init__(self, logger):
+        # Configure loggers
+        self.logger = logger or logging.getLogger(__name__)
         # Init tags
         self._source = 100
 
     # source control **********************************************************
     @property
     def source(self):
-        self.log.debug('Returning current value: %s', self._source)
+        self.logger.debug('Returning current value: %s', self._source)
         return str(self._source)
 
     @source.setter
     def source(self, value):
         if isinstance(value, int):
             self._source = value
-            self.log.debug('Source updated to: %s', self._source)
+            self.logger.debug('Source updated to: %s', self._source)
         elif isinstance(value, str):
             self._source = int(value)
-            self.log.debug('Source updated to: %s', self._source)
+            self.logger.debug('Source updated to: %s', self._source)
         else:
-            self.log.debug('Invalid source value: %s', value)
+            self.logger.debug('Invalid source value: %s', value)
 
     # new value control *******************************************************
     def new(self):
@@ -54,16 +52,3 @@ class RefNum(object):
         if self._source > 999:
             self._source = 100
         return str(self._source)
-
-
-if __name__ == "__main__":
-    root = logging.getLogger()
-    handler = logging.StreamHandler(sys.stdout)
-    handler.setLevel(logging.DEBUG)
-    root.addHandler(handler)
-
-    rn = RefNum(root)
-    print("\n\nTesting RefNum class")
-    for i in range(1, 10, 1):
-        print(rn.new())
-    print("\n\n")
