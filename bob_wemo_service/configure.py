@@ -30,8 +30,6 @@ class ConfigureService(object):
         self.message_types = {}
         # Define connection to configuration file
         self.config_file = configparser.ConfigParser()
-        # Configure logger
-        self.log = self.get_logger()
 
 
     def get_logger(self):
@@ -52,7 +50,7 @@ class ConfigureService(object):
         self.logger.info('Console logger handler created and applied')
         # File handler
         self.fh = logging.handlers.TimedRotatingFileHandler(
-            os.path.join(self.log_path, "_Debug.log"),
+            os.path.join(self.log_path, "Debug.log"),
             when='d',
             interval=1,
             backupCount=4
@@ -64,6 +62,7 @@ class ConfigureService(object):
         )
         self.fh.setFormatter(self.ff)
         self.logger.addHandler(self.fh)
+        self.logger.info('File logger handler created and applied')
         # Return configured objects to main program
         return self.logger
 

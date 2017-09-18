@@ -40,7 +40,7 @@ def create_heartbeat_msg(logger, ref_num, destinations, source_addr, source_port
     # Generate a heartbeat message for each destination given
     for entry in destinations:
         out_msg = HeartbeatMessage(
-            logger,
+            logger=logger,
             ref=ref_num.new(),
             dest_addr=entry[0],
             dest_port=entry[1],
@@ -65,13 +65,13 @@ def process_heartbeat_msg(logger, ref_num, msg, message_types):
     out_msg_list = []
 
     # Map message into wemo wake-up message class
-    message = HeartbeatMessage(logger)
+    message = HeartbeatMessage(logger=logger)
     message.complete = msg
 
     # Send response indicating query was executed
     logger.debug('Building response message header')
     out_msg = HeartbeatMessageACK(
-        logger,
+        logger=logger,
         ref=ref_num.new(),
         dest_addr=message.source_addr,
         dest_port=message.source_port,
@@ -98,7 +98,7 @@ def get_wemo_state(logger, ref_num, wemo_gw, msg, message_types):
     out_msg_list = []
 
     # Map message into GDS message class
-    message = GetDeviceStateMessage(logger)
+    message = GetDeviceStateMessage(logger=logger)
     message.complete = msg    
 
     # Execute Status Update
@@ -117,7 +117,7 @@ def get_wemo_state(logger, ref_num, wemo_gw, msg, message_types):
     # Send response indicating query was executed
     logger.debug('Building response message header')
     out_msg = GetDeviceStateMessageACK(
-        logger,
+        logger=logger,
         ref=ref_num.new(),
         dest_addr=message.source_addr,
         dest_port=message.source_port,
@@ -147,7 +147,7 @@ def set_wemo_state(logger, ref_num, wemo_gw, msg, message_types):
     out_msg_list = []
 
     # Map message into CCS message class
-    message = SetDeviceStateMessage(logger)
+    message = SetDeviceStateMessage(logger=logger)
     message.complete = msg
 
     # Execute wemo on commands
@@ -177,7 +177,7 @@ def set_wemo_state(logger, ref_num, wemo_gw, msg, message_types):
     # Send response indicating command was executed
     logger.debug('Building response message')
     out_msg = SetDeviceStateMessageACK(
-        logger,
+        logger=logger,
         ref=ref_num.new(),
         dest_addr=message.source_addr,
         dest_port=message.source_port,

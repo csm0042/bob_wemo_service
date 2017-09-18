@@ -28,7 +28,7 @@ __status__ = "Development"
 # Message Class Definition ****************************************************
 class GetDeviceStateMessageACK(object):
     """ Log Status Update message class and methods """
-    def __init__(self, logger, **kwargs):
+    def __init__(self, logger=None, **kwargs):
         # Configure loggers
         self.logger = logger or logging.getLogger(__name__)
 
@@ -80,7 +80,7 @@ class GetDeviceStateMessageACK(object):
                 if key == "dev_status":
                     self.dev_status = value
                     self.logger.debug('Device Status value set during __init__ '
-                                      'to: %s', self.dev_status)                                   
+                                      'to: %s', self.dev_status)
                 if key == "dev_last_seen":
                     self.dev_last_seen = value
                     self.logger.debug('Device last seen value set during __init__ '
@@ -94,7 +94,7 @@ class GetDeviceStateMessageACK(object):
 
     @ref.setter
     def ref(self, value):
-        if in_int_range(self.logger, value, 100, 999) is True:
+        if in_int_range(value, 100, 999, logger=self.logger) is True:
             self._ref = str(value)
             self.logger.debug('Ref number updated to: %s', self._ref)
         else:
@@ -110,7 +110,7 @@ class GetDeviceStateMessageACK(object):
 
     @dest_addr.setter
     def dest_addr(self, value):
-        if check_ipv4(value) is True:
+        if check_ipv4(value, logger=self.logger) is True:
             self._dest_addr = str(value)
             self.logger.debug('Destination address updated to: '
                               '%s', self._dest_addr)
@@ -127,7 +127,7 @@ class GetDeviceStateMessageACK(object):
 
     @dest_port.setter
     def dest_port(self, value):
-        if in_int_range(self.logger, value, 10000, 60000) is True:
+        if in_int_range(value, 10000, 60000, logger=self.logger) is True:
             self._dest_port = str(value)
             self.logger.debug('Destination port updated to: %s', self._dest_port)
         else:
@@ -143,7 +143,7 @@ class GetDeviceStateMessageACK(object):
 
     @source_addr.setter
     def source_addr(self, value):
-        if check_ipv4(value) is True:
+        if check_ipv4(value, logger=self.logger) is True:
             self._source_addr = value
             self.logger.debug('source address updated to: '
                               '%s', self._source_addr)
@@ -160,7 +160,7 @@ class GetDeviceStateMessageACK(object):
 
     @source_port.setter
     def source_port(self, value):
-        if in_int_range(self.logger, value, 10000, 60000) is True:
+        if in_int_range(value, 10000, 60000, logger=self.logger) is True:
             self._source_port = str(value)
             self.logger.debug('Source port updated to: %s', self._source_port)
         else:
@@ -176,7 +176,7 @@ class GetDeviceStateMessageACK(object):
 
     @msg_type.setter
     def msg_type(self, value):
-        if in_int_range(self.logger, value, 100, 999) is True:
+        if in_int_range(value, 100, 999, logger=self.logger) is True:
             self._msg_type = str(value)
             self.logger.debug('Message type updated to: %s', self._msg_type)
         else:
@@ -225,9 +225,9 @@ class GetDeviceStateMessageACK(object):
     @dev_last_seen.setter
     def dev_last_seen(self, value):
         self._dev_last_seen = is_valid_datetime(
-            self.logger,
             value,
-            self._dev_last_seen)
+            self._dev_last_seen,
+            logger=self.logger)
         self.logger.debug('Device last seen updated to: %s', self._dev_last_seen)
 
     # complete message encode/decode methods **********************************

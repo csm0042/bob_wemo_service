@@ -24,7 +24,7 @@ __status__ = "Development"
 
 # Message Handler Class Def ***************************************************
 class MessageHandler(object):
-    def __init__(self, logger, loop):
+    def __init__(self, loop, logger=None):
         # Configure loggers
         self.logger = logger or logging.getLogger(__name__)
 
@@ -63,7 +63,7 @@ class MessageHandler(object):
         self.logger.debug('Received %r from %r', self.message, self.addr)
 
         # Coping incoming message to message buffer
-        self.logger.info('Received message: %s', self.message)
+        self.logger.debug('Received message: %s', self.message)
         self.msg_in_queue.put_nowait(self.message)
         self.logger.debug('Resulting buffer length: %s',
                           str(self.msg_in_queue.qsize()))
@@ -74,7 +74,7 @@ class MessageHandler(object):
         self.msg_seg = self.message.split(',')
         self.logger.debug('Extracted msg sequence number: [%s]', self.msg_seg[0])
         self.ack_to_send = self.msg_seg[0].encode()
-        self.logger.info('Sending ACK: %s', self.ack_to_send)
+        self.logger.debug('Sending ACK: %s', self.ack_to_send)
         self.writer.write(self.ack_to_send)
         yield from writer.drain()
         self.logger.debug('Closing the socket after sending ACK')
@@ -91,7 +91,7 @@ class MessageHandler(object):
                 self.sleep_time = 0.05
                 self.logger.debug('Pulling next outgoing message from queue')
                 self.msg_to_send = self.msg_out_queue.get_nowait()
-                self.logger.info('Preparing to send message: %s', self.msg_to_send)
+                self.logger.debug('Preparing to send message: %s', self.msg_to_send)
                 self.logger.debug('Extracting msg destination address and port')
                 self.msg_seg_out = self.msg_to_send.split(',')
                 self.logger.debug('Opening outgoing connection to %s:%s',
@@ -99,13 +99,13 @@ class MessageHandler(object):
                 try:
                     self.reader_out, self.writer_out = yield from asyncio.open_connection(
                         self.msg_seg_out[1], int(self.msg_seg_out[2]), loop=self.loop)
-                    self.logger.info('Sending message: %s', self.msg_to_send)
+                    self.logger.debug('Sending message: %s', self.msg_to_send)
                     self.writer_out.write(self.msg_to_send.encode())
 
-                    self.logger.info('Waiting for ack')
+                    self.logger.debug('Waiting for ack')
                     self.data_ack = yield from self.reader_out.read(200)
                     self.ack = self.data_ack.decode()
-                    self.logger.info('Received ACK: %r', self.ack)
+                    self.logger.debug('Received ACK: %r', self.ack)
                     self.logger.debug('Closing socket')
                     self.writer_out.close()
                 except Exception:
