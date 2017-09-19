@@ -34,10 +34,15 @@ def check_ipv4(address, logger=None):
     if isinstance(address, str) is not True:
         try:
             address = str(address)
+            logger.debug('Input value was successfully converted to string')
         except Exception:
             return False
+    else:
+        logger.debug('Input value was not a string: %s', str(address))
     # check if address is formatted correctly for an ipv4 address
     if re.fullmatch(ipv4_regex, address) is not None:
+        logger.debug('Provided address is a valid IP address: %s', address)
         return True
     else:
+        logger.debug('Provided address is NOT a valid IP address: %s', address)
         return False
