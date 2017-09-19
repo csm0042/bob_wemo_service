@@ -24,28 +24,28 @@ __status__ = "Development"
 
 # Log Filter for Individual file/functions ************************************
 class MyLogHandlerFilter(logging.Filter):
-    def __init__(self, file_name=None, func_name=None):
+    def __init__(self, file_name, func_name):
         self.file_name = file_name
         self.func_name = func_name
         super().__init__()
 
     def filter(self, record):
-        if self.file_name is not None and self.func_name is not None:
+        if len(self.file_name) != 0 and len(self.func_name) != 0:
             if record.filename == self.file_name and record.funcName == self.func_name:
                 return True
             else:
                 return False
-        elif self.file_name is not None and self.func_name is None:
+        elif len(self.file_name) != 0 and len(self.func_name) == 0:
             if record.filename == self.file_name:
                 return True
             else:
                 return False
-        elif self.file_name is None and self.func_name is not None:
+        elif len(self.file_name) == 0 and len(self.func_name) != 0:
             if record.funcName == self.func_name:
                 return True
             else:
                 return False
-        elif self.file_name is None and self.func_name is None:
+        elif len(self.file_name) == 0 and len(self.func_name) == 0:
             return True
         else:
             return False
@@ -60,6 +60,9 @@ class ConfigureService(object):
         self.handlers = []
         self.filters = []
         self.formatters = []
+        self.file_name = str()
+        self.func_name = str()
+        self.log_file_name = str()
         # Define connection to configuration file
         self.config_file = configparser.ConfigParser()
 
@@ -98,16 +101,35 @@ class ConfigureService(object):
         # Extra handlers defined by config.ini
         self.i = 0
         for key, value in self.config_file.items('EXTRA LOG HANDLERS'):
-            filename, funcname = value.split("/", 1)
+            self.file_name = str()
+            self.func_name = str()
+            self.split = value.split("/", 1)
+            if len(self.split) >= 1:
+                self.file_name = self.split[0]
+                self.log_file_name = self.split[0]
+            if len(self.split) >= 2:
+                self.func_name = self.split[1]
+                if len(self.log_file_name) > 0:
+                    self.log_file_name = self.log_file_name + "."
+                self.log_file_name = self.log_file_name + self.split[1]
+            self.log_file_name = self.log_file_name + ".log"
+
             # Create individual handler for this function name
-            self.handlers.append(logging.handlers.TimedRotatingFileHandler(
-                os.path.join(self.log_path, filename + "." + funcname + ".log"),
-                when='d',
-                interval=1,
-                backupCount=4
-            ))
+            self.handlers.append(
+                logging.handlers.TimedRotatingFileHandler(
+                    os.path.join(self.log_path, self.log_file_name),
+                    when='d',
+                    interval=1,
+                    backupCount=4
+                )
+            )
             # Create filter based on function name and apply to handler
-            self.filters.append(MyLogHandlerFilter(file_name=filename, func_name=funcname))
+            self.filters.append(
+                MyLogHandlerFilter(
+                    file_name=self.file_name,
+                    func_name=self.func_name
+                )
+            )
             self.handlers[self.i].addFilter(self.filters[self.i])
             # Create formatter and apply to handler
             self.formatters.append(logging.Formatter('%(asctime)-25s %(levelname)-10s %(message)s'))
