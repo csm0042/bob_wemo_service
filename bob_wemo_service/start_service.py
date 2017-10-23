@@ -38,6 +38,7 @@ LOGGER = SERVICE_CONFIG.get_logger()
 SERVICE_ADDRESSES = SERVICE_CONFIG.get_servers()
 MESSAGE_TYPES = SERVICE_CONFIG.get_message_types()
 WEMO_GW = WemoAPI(LOGGER)
+DEVICES = SERVICE_CONFIG.get_devices()
 
 REF_NUM = RefNum(logger=LOGGER)
 LOOP = asyncio.get_event_loop()
@@ -49,7 +50,8 @@ MAINTASK = MainTask(
     msg_in_queue=COMM_HANDLER.msg_in_queue,
     msg_out_queue=COMM_HANDLER.msg_out_queue,
     service_addresses=SERVICE_ADDRESSES,
-    message_types=MESSAGE_TYPES
+    message_types=MESSAGE_TYPES,
+    devices=DEVICES
 )
 
 

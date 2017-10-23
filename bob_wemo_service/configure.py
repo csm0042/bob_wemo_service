@@ -9,6 +9,9 @@ import logging
 import logging.handlers
 import os
 import sys
+if __name__ == "__main__":
+    sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from bob_wemo_service.tools.device import Device
 
 
 # Authorship Info *************************************************************
@@ -63,6 +66,15 @@ class ConfigureService(object):
         self.file_name = str()
         self.func_name = str()
         self.log_file_name = str()
+        self.devices = []
+        self.device_num = int()
+        self.device_id = str()
+        self.i = int()
+        self.device = None
+        self.name_key = str()
+        self.type_key = str()
+        self.addr_key = str()
+        self.rule_key = str()
         # Define connection to configuration file
         self.config_file = configparser.ConfigParser()
 
@@ -158,3 +170,53 @@ class ConfigureService(object):
             self.message_types[option] = self.config_file['MESSAGE TYPES'][option]
         # Return dict of configured addresses and ports to main program
         return self.message_types
+
+
+    def get_devices(self):
+        self.config_file.read(self.filename)
+        # Create list of automation devices defined in config.ini file
+        self.devices = []
+        self.logger.debug('Begining search for device configuration in config file')
+        self.device_num = int(self.config_file['DEVICES']['device_num']) + 1
+        self.logger.debug('Importing configuration for %s devices', str(self.device_num))
+        for self.i in range(1, self.device_num, 1):
+            try:
+                if len(str(self.i)) == 1:
+                    self.logger.debug('Single digit device ID number')
+                    self.device_id = 'device0' + str(self.i)
+                elif len(str(self.i)) == 2:
+                    self.logger.debug('Double digit device ID number')
+                    self.device_id = 'device' + str(self.i)
+                self.logger.debug(
+                    'Appending new %s to list',
+                    self.device_id
+                )
+                self.name_key = self.device_id + '_name'
+                self.type_key = self.device_id + '_devtype'
+                self.addr_key = self.device_id + '_address'
+                self.rule_key = self.device_id + '_rule'
+                self.devices.append(
+                    Device(
+                        dev_name=self.config_file['DEVICES'][self.name_key],
+                        dev_type=self.config_file['DEVICES'][self.type_key],
+                        dev_addr=self.config_file['DEVICES'][self.addr_key],
+                        dev_rule=self.config_file['DEVICES'][self.rule_key]
+                    )
+                )
+                self.logger.debug(
+                    'Device %s added to automation device list',
+                    self.config_file['DEVICES'][self.name_key]
+                )
+            except Exception:
+                self.logger.debug('error')
+                pass
+        self.logger.debug('Completed automation device list:')
+        for self.device in self.devices:
+            self.logger.debug(
+                '%s, %s, %s, %s, %s, %s, %s',
+                self.device.dev_name, self.device.dev_type,
+                self.device.dev_addr, self.device.dev_cmd,
+                self.device.dev_status, self.device.dev_last_seen,
+                self.device.dev_rule)
+        # Return configured objects to main program
+        return self.devices

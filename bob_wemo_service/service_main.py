@@ -51,6 +51,11 @@ class MainTask(object):
         self.msg_source_port = str()
         self.msg_type = str()
         self.destinations = []
+        self.match = False
+        self.device = None
+        self.devices = []
+        self.wemo_device = None
+        self.discover_wemo_ts = datetime.datetime
         # Map input variables
         if kwargs is not None:
             for key, value in kwargs.items():
@@ -78,12 +83,50 @@ class MainTask(object):
                     self.message_types = value
                     self.logger.debug('Message type list set during __init__ '
                                       'to: %s', self.message_types)
+                if key == "devices":
+                    self.devices = value
+                    self.logger.debug('Device list set during __init__ '
+                                      'to: %s', self.devices)
+
+
+    def discover_wemo(self):
+        # Search Network for any devices not previously discovered
+        self.logger.debug(
+            'Checking list of discovered devices against configured '
+            'device list: %s', self.devices
+        )
+        for self.device in self.devices:
+            if 'wemo' in self.device.dev_type:
+                self.match = False
+                for self.wemo_device in self.gateway.wemo_known:
+                    if self.device.dev_name == self.wemo_device.name:
+                        self.match = True
+                        self.logger.debug(
+                            'Device %s already discovered',
+                            self.device.dev_name
+                        )
+                        break
+                if self.match is False:
+                    self.logger.debug(
+                        'Device %s not previously discovered. Running discovery now',
+                        self.device.dev_name
+                    )
+                    self.gateway.discover(
+                        self.device.dev_name,
+                        self.device.dev_addr
+                    )
+
 
     @asyncio.coroutine
     def run(self):
         """ task to handle the work the service is intended to do """
         self.logger.info('Starting wemo service main task')
-        
+
+        # Search Network for any devices not previously discovered
+        self.discover_wemo()
+        self.discover_wemo_ts = datetime.datetime.now()
+
+        # Main process loop
         while True:
             # Initialize result list
             self.out_msg_list = []
@@ -169,6 +212,14 @@ class MainTask(object):
 
                 # Update last-check
                 self.last_check_hb = datetime.datetime.now()
+
+
+            # WEMO DEVICE DISCOVERY
+            # Search Network for any devices not previously discovered
+            if datetime.datetime.now() >= (self.discover_wemo_ts + datetime.timedelta(minutes=5)):
+                self.discover_wemo()
+                self.discover_wemo_ts = datetime.datetime.now()
+
 
             # Yield to other tasks for a while
             yield from asyncio.sleep(self.sleep_time)
