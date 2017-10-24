@@ -19,7 +19,7 @@ from bob_wemo_service.msg_processing import set_wemo_state
 
 # Authorship Info *************************************************************
 __author__ = "Christopher Maue"
-__copyright__ = "Copyright 2017, The RPi-Home Project"
+__copyright__ = "Copyright 2017, The B.O.B. Project"
 __credits__ = ["Christopher Maue"]
 __license__ = "GPL"
 __version__ = "1.0.0"
@@ -54,7 +54,7 @@ class MainTask(object):
         self.match = None
         self.devices = []
         self.dev_ptr = 0
-        self.discover_wemo_ts = datetime.datetime
+        self.discover_wemo_ts = datetime.datetime.now() - datetime.timedelta(minutes=5)
         # Map input variables
         if kwargs is not None:
             for key, value in kwargs.items():
@@ -104,12 +104,12 @@ class MainTask(object):
 
     @asyncio.coroutine
     def discover_wemo(self):
-        """ Searches network for devices configured but not previously discovered 
+        """ Searches network for devices configured but not previously discovered
         """
         # Reset the device pointer every 5 minutes to start a new discovery loop
-        if datetime.datetime.now() \
-            >= (self.discover_wemo_ts + datetime.timedelta(minutes=5)) \
-            and self.dev_ptr >= (len(self.devices) - 1):
+        if datetime.datetime.now() >= \
+            (self.discover_wemo_ts + datetime.timedelta(minutes=5)) and \
+            self.dev_ptr >= (len(self.devices) - 1):
             self.dev_ptr = 0
             self.logger.debug(
                 'Checking list of discovered devices against configured '
@@ -125,7 +125,7 @@ class MainTask(object):
                 self.match = self.gateway.search_by_name(
                     self.devices[self.dev_ptr].dev_name
                 )
-                # If a match is found, the device was already discovered and 
+                # If a match is found, the device was already discovered and
                 # nothing more needs to be done
                 if self.match is not None:
                     self.logger.debug(
@@ -148,10 +148,6 @@ class MainTask(object):
     def run(self):
         """ task to handle the work the service is intended to do """
         self.logger.info('Starting wemo service main task')
-
-        # Search Network for any devices not previously discovered
-        self.discover_wemo()
-        self.discover_wemo_ts = datetime.datetime.now()
 
         # Main process loop
         while True:

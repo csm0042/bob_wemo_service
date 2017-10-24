@@ -16,7 +16,7 @@ from bob_wemo_service.tools.ipv4_help import check_ipv4
 
 # Authorship Info *************************************************************
 __author__ = "Christopher Maue"
-__copyright__ = "Copyright 2017, The RPi-Home Project"
+__copyright__ = "Copyright 2017, The B.O.B. Project"
 __credits__ = ["Christopher Maue"]
 __license__ = "GPL"
 __version__ = "1.0.0"
@@ -62,14 +62,17 @@ class WemoAPI(object):
     def discover(self, name, address):
         """ discovers wemo device on network based upon known IP address """
         if check_ipv4(address) is True:
-            self.logger.info('Attempting to discover wemo device')
+            self.logger.info(
+                'Attempting to discover wemo device: %s @ %s',
+                name, address
+            )
             try:
                 self.wemo_device = None
                 self.wemo_port = pywemo.ouimeaux_device.probe_wemo(address)
                 self.logger.debug('Device discovered at port %s', self.wemo_port)
             except Exception:
                 self.wemo_port = None
-                self.logger.debug('Failed to discover port for [%s]', name)
+                self.logger.warning('Failed to discover port for: %s', name)
         else:
             self.wemo_port = None
             self.logger.debug('Invalid IP address in device attributes')
@@ -81,11 +84,12 @@ class WemoAPI(object):
                 self.wemo_device = pywemo.discovery.device_from_description(
                     self.wemo_url,
                     None)
-                self.logger.debug('[%s] discovery successful', name)
+                self.logger.debug('Discovery successful for: %s', name)
             except Exception:
-                self.logger.debug('[%s] discovery failed', name)
+                self.logger.warning('Discovery failed for: %s', name)
                 self.wemo_device = None
         else:
+            self.logger.warning('Discovery failed for: %s', name)
             self.wemo_device = None
         # Return device to calling program
         return self.wemo_device

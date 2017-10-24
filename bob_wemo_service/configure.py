@@ -16,7 +16,7 @@ from bob_wemo_service.tools.device import Device
 
 # Authorship Info *************************************************************
 __author__ = "Christopher Maue"
-__copyright__ = "Copyright 2017, The RPi-Home Project"
+__copyright__ = "Copyright 2017, The B.O.B. Project"
 __credits__ = ["Christopher Maue"]
 __license__ = "GPL"
 __version__ = "1.0.0"
@@ -27,28 +27,38 @@ __status__ = "Development"
 
 # Log Filter for Individual file/functions ************************************
 class MyLogHandlerFilter(logging.Filter):
+    """ custom log handler filter object used for sorting log messages to
+        various log files
+    """
     def __init__(self, file_name, func_name):
         self.file_name = file_name
         self.func_name = func_name
         super().__init__()
 
     def filter(self, record):
+        """ function to filter based on file and function name where log record
+            originated
+        """
         if len(self.file_name) != 0 and len(self.func_name) != 0:
-            if record.filename == self.file_name and record.funcName == self.func_name:
+            if record.filename == self.file_name and \
+                record.funcName == self.func_name:
                 return True
             else:
                 return False
-        elif len(self.file_name) != 0 and len(self.func_name) == 0:
+        elif len(self.file_name) != 0 and \
+            len(self.func_name) == 0:
             if record.filename == self.file_name:
                 return True
             else:
                 return False
-        elif len(self.file_name) == 0 and len(self.func_name) != 0:
+        elif len(self.file_name) == 0 and \
+            len(self.func_name) != 0:
             if record.funcName == self.func_name:
                 return True
             else:
                 return False
-        elif len(self.file_name) == 0 and len(self.func_name) == 0:
+        elif len(self.file_name) == 0 and \
+            len(self.func_name) == 0:
             return True
         else:
             return False
@@ -56,6 +66,9 @@ class MyLogHandlerFilter(logging.Filter):
 
 # Config Function Def *********************************************************
 class ConfigureService(object):
+    """ Configuration object with methods used to configure service via 
+        the included INI file
+    """
     def __init__(self, filename):
         self.filename = filename
         self.service_addresses = {}
@@ -80,7 +93,8 @@ class ConfigureService(object):
 
 
     def get_logger(self):
-        # Set up application logging
+        """ Set up application logging
+        """
         self.config_file.read(self.filename)
         self.log_path = self.config_file['LOG FILES']['log_file_path']
         self.logger = logging.getLogger('master')
@@ -144,7 +158,9 @@ class ConfigureService(object):
             )
             self.handlers[self.i].addFilter(self.filters[self.i])
             # Create formatter and apply to handler
-            self.formatters.append(logging.Formatter('%(asctime)-25s %(levelname)-10s %(message)s'))
+            self.formatters.append(
+                logging.Formatter('%(asctime)-25s %(levelname)-10s %(message)s')
+            )
             self.handlers[self.i].setFormatter(self.formatters[self.i])
             # Add handler to logger
             self.logger.addHandler(self.handlers[self.i])
@@ -155,7 +171,8 @@ class ConfigureService(object):
 
 
     def get_servers(self):
-        # Create dict with all services defined in INI file
+        """ Create dict with all services defined in INI file
+        """
         self.config_file.read(self.filename)
         for option in self.config_file.options('SERVICES'):
             self.service_addresses[option] = self.config_file['SERVICES'][option]
@@ -164,7 +181,8 @@ class ConfigureService(object):
 
 
     def get_message_types(self):
-        # Create dict with all services defined in INI file
+        """ Create dict with all message types defined in INI file
+        """
         self.config_file.read(self.filename)
         for option in self.config_file.options('MESSAGE TYPES'):
             self.message_types[option] = self.config_file['MESSAGE TYPES'][option]
@@ -173,8 +191,9 @@ class ConfigureService(object):
 
 
     def get_devices(self):
+        """ Create list of devices the system should expect to exist
+        """
         self.config_file.read(self.filename)
-        # Create list of automation devices defined in config.ini file
         self.devices = []
         self.logger.debug('Begining search for device configuration in config file')
         self.device_num = int(self.config_file['DEVICES']['device_num']) + 1

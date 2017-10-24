@@ -20,7 +20,7 @@ from bob_wemo_service.messages.set_device_state_ack import SetDeviceStateMessage
 
 # Authorship Info *************************************************************
 __author__ = "Christopher Maue"
-__copyright__ = "Copyright 2017, The RPi-Home Project"
+__copyright__ = "Copyright 2017, The B.O.B. Project"
 __credits__ = ["Christopher Maue"]
 __license__ = "GPL"
 __version__ = "1.0.0"
@@ -77,7 +77,8 @@ def process_heartbeat_msg(logger, ref_num, msg, message_types):
         dest_port=message.source_port,
         source_addr=message.dest_addr,
         source_port=message.dest_port,
-        msg_type=message_types['heartbeat_ack'])
+        msg_type=message_types['heartbeat_ack']
+    )
 
     # Load message into output list
     logger.debug('Loading completed msg: [%s]', out_msg.complete)
@@ -99,20 +100,23 @@ def get_wemo_state(logger, ref_num, wemo_gw, msg, message_types):
 
     # Map message into GDS message class
     message = GetDeviceStateMessage(logger=logger)
-    message.complete = msg    
+    message.complete = msg
 
     # Execute Status Update
-    logger.debug('Requesting status for [%s] at [%s] with original status '
-                 '[%s] and update time [%s]',
-                 message.dev_name,
-                 message.dev_addr,
-                 message.dev_status,
-                 message.dev_last_seen)
+    logger.debug(
+        'Requesting status for [%s] at [%s] with original status '
+        '[%s] and update time [%s]',
+        message.dev_name,
+        message.dev_addr,
+        message.dev_status,
+        message.dev_last_seen
+    )
     dev_status_new, dev_last_seen_new = wemo_gw.read_status(
         message.dev_name,
         message.dev_addr,
         message.dev_status,
-        message.dev_last_seen)
+        message.dev_last_seen
+    )
 
     # Send response indicating query was executed
     logger.debug('Building response message header')
@@ -126,7 +130,8 @@ def get_wemo_state(logger, ref_num, wemo_gw, msg, message_types):
         msg_type=message_types['get_device_state_ack'],
         dev_name=message.dev_name,
         dev_status=str(dev_status_new),
-        dev_last_seen=str(dev_last_seen_new)[:19])
+        dev_last_seen=str(dev_last_seen_new)[:19]
+    )
 
     # Load message into output list
     logger.debug('Loading completed msg: [%s]', out_msg.complete)
@@ -152,25 +157,35 @@ def set_wemo_state(logger, ref_num, wemo_gw, msg, message_types):
 
     # Execute wemo on commands
     if message.dev_cmd == '1' or message.dev_cmd == 'on':
-        logger.debug('Commanding wemo device [%s] to "on"', message.dev_name)
+        logger.debug(
+            'Commanding wemo device [%s] to "on"',
+            message.dev_name
+        )
         dev_status_new, dev_last_seen_new = wemo_gw.turn_on(
             message.dev_name,
             message.dev_addr,
-            message.dev_last_seen)
+            message.dev_last_seen
+        )
 
     # Execute wemo off commands
     elif message.dev_cmd == '0' or message.dev_cmd == 'off':
-        logger.debug('Commanding wemo device [%s] to "off"', message.dev_name)
+        logger.debug(
+            'Commanding wemo device [%s] to "off"',
+            message.dev_name
+        )
         dev_status_new, dev_last_seen_new = wemo_gw.turn_off(
             message.dev_name,
             message.dev_addr,
-            message.dev_last_seen)
+            message.dev_last_seen
+        )
 
     # If command not valid, leave device un-changed
     else:
-        logger.warning('Invalid command [%s] for device [%s]',
-                       message.dev_cmd,
-                       message.dev_name)
+        logger.warning(
+            'Invalid command [%s] for device [%s]',
+            message.dev_cmd,
+            message.dev_name
+        )
         dev_status_new = copy.copy(message.dev_status)
         dev_last_seen_new = copy.copy(message.dev_last_seen)
 
@@ -186,10 +201,14 @@ def set_wemo_state(logger, ref_num, wemo_gw, msg, message_types):
         msg_type=message_types['set_device_state_ack'],
         dev_name=message.dev_name,
         dev_status=dev_status_new,
-        dev_last_seen=dev_last_seen_new)
+        dev_last_seen=dev_last_seen_new
+    )
 
     # Load message into output list
-    logger.debug('Loading completed msg: [%s]', out_msg.complete)
+    logger.debug(
+        'Loading completed msg: [%s]',
+        out_msg.complete
+    )
     out_msg_list.append(copy.copy(out_msg.complete))
 
     # Return response message

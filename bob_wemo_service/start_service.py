@@ -19,7 +19,7 @@ from bob_wemo_service.tools.message_handlers import MessageHandler
 
 # Authorship Info *************************************************************
 __author__ = "Christopher Maue"
-__copyright__ = "Copyright 2017, The RPi-Home Project"
+__copyright__ = "Copyright 2017, The B.O.B. Project"
 __credits__ = ["Christopher Maue"]
 __license__ = "GPL"
 __version__ = "1.0.0"
@@ -62,20 +62,26 @@ def main():
 
     # Create incoming message server
     try:
-        LOGGER.debug('Creating incoming message listening server at [%s:%s]',
-                     SERVICE_ADDRESSES['wemo_addr'],
-                     SERVICE_ADDRESSES['wemo_port'])
+        LOGGER.debug(
+            'Creating incoming message listening server at %s:%s',
+            SERVICE_ADDRESSES['wemo_addr'],
+            SERVICE_ADDRESSES['wemo_port']
+        )
         msg_in_server = asyncio.start_server(
             COMM_HANDLER.handle_msg_in,
             host=SERVICE_ADDRESSES['wemo_addr'],
             port=int(SERVICE_ADDRESSES['wemo_port']))
-        LOGGER.debug('Wrapping servier in future task and scheduling for '
-                     'execution')
+        LOGGER.debug(
+            'Wrapping servier in future task and scheduling for '
+            'execution'
+        )
         msg_in_task = LOOP.run_until_complete(msg_in_server)
     except Exception:
-        LOGGER.debug('Failed to create socket listening connection at %s:%s',
-                     SERVICE_ADDRESSES['wemo_addr'],
-                     SERVICE_ADDRESSES['wemo_port'])
+        LOGGER.debug(
+            'Failed to create socket listening connection at %s:%s',
+            SERVICE_ADDRESSES['wemo_addr'],
+            SERVICE_ADDRESSES['wemo_port']
+        )
         sys.exit()
 
     # Create main task for this service
@@ -88,7 +94,7 @@ def main():
 
     # Serve requests until Ctrl+C is pressed
     LOGGER.info('Wemo Gateway Service')
-    LOGGER.info('Serving on {}'.format(msg_in_task.sockets[0].getsockname()))
+    LOGGER.info('Serving on %s', msg_in_task.sockets[0].getsockname())
     LOGGER.info('Press CTRL+C to exit')
     try:
         LOOP.run_forever()
