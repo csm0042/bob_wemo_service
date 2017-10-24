@@ -17,7 +17,6 @@ from bob_wemo_service.msg_processing import get_wemo_state
 from bob_wemo_service.msg_processing import set_wemo_state
 
 
-
 # Authorship Info *************************************************************
 __author__ = "Christopher Maue"
 __copyright__ = "Copyright 2017, The RPi-Home Project"
@@ -31,6 +30,7 @@ __status__ = "Development"
 
 # Internal Service Work Task **************************************************
 class MainTask(object):
+    """ Main task loop for service """
     def __init__(self, logger, **kwargs):
         # Configure loggers
         self.logger = logger or logging.getLogger(__name__)
@@ -51,69 +51,96 @@ class MainTask(object):
         self.msg_source_port = str()
         self.msg_type = str()
         self.destinations = []
-        self.match = False
-        self.device = None
+        self.match = None
         self.devices = []
-        self.wemo_device = None
+        self.dev_ptr = 0
         self.discover_wemo_ts = datetime.datetime
         # Map input variables
         if kwargs is not None:
             for key, value in kwargs.items():
                 if key == "ref":
                     self.ref_num = value
-                    self.logger.debug('Ref number generator set during __init__ '
-                                      'to: %s', self.ref_num)
+                    self.logger.debug(
+                        'Ref number generator set during __init__ to: %s',
+                        self.ref_num
+                    )
                 if key == "gw":
                     self.gateway = value
-                    self.logger.debug('Device gateway set during __init__ '
-                                      'to: %s', self.gateway)
+                    self.logger.debug(
+                        'Device gateway set during __init__ to: %s',
+                        self.gateway
+                    )
                 if key == "msg_in_queue":
                     self.msg_in_queue = value
-                    self.logger.debug('Message in queue set during __init__ '
-                                      'to: %s', self.msg_in_queue)
+                    self.logger.debug(
+                        'Message in queue set during __init__ to: %s',
+                        self.msg_in_queue
+                    )
                 if key == "msg_out_queue":
                     self.msg_out_queue = value
-                    self.logger.debug('Message out queue set during __init__ '
-                                      'to: %s', self.msg_out_queue)
+                    self.logger.debug(
+                        'Message out queue set during __init__ to: %s',
+                        self.msg_out_queue
+                    )
                 if key == "service_addresses":
                     self.service_addresses = value
-                    self.logger.debug('Service address list set during __init__ '
-                                      'to: %s', self.service_addresses)
+                    self.logger.debug(
+                        'Service address list set during __init__ to: %s',
+                        self.service_addresses
+                    )
                 if key == "message_types":
                     self.message_types = value
-                    self.logger.debug('Message type list set during __init__ '
-                                      'to: %s', self.message_types)
+                    self.logger.debug(
+                        'Message type list set during __init__ to: %s',
+                        self.message_types
+                    )
                 if key == "devices":
                     self.devices = value
-                    self.logger.debug('Device list set during __init__ '
-                                      'to: %s', self.devices)
+                    self.logger.debug(
+                        'Device list set during __init__ to: %s',
+                        self.devices
+                    )
 
 
+    @asyncio.coroutine
     def discover_wemo(self):
-        # Search Network for any devices not previously discovered
-        self.logger.debug(
-            'Checking list of discovered devices against configured '
-            'device list: %s', self.devices
-        )
-        for self.device in self.devices:
-            if 'wemo' in self.device.dev_type:
-                self.match = False
-                for self.wemo_device in self.gateway.wemo_known:
-                    if self.device.dev_name == self.wemo_device.name:
-                        self.match = True
-                        self.logger.debug(
-                            'Device %s already discovered',
-                            self.device.dev_name
-                        )
-                        break
-                if self.match is False:
+        """ Searches network for devices configured but not previously discovered 
+        """
+        # Reset the device pointer every 5 minutes to start a new discovery loop
+        if datetime.datetime.now() \
+            >= (self.discover_wemo_ts + datetime.timedelta(minutes=5)) \
+            and self.dev_ptr >= (len(self.devices) - 1):
+            self.dev_ptr = 0
+            self.logger.debug(
+                'Checking list of discovered devices against configured '
+                'device list: %s', self.devices
+            )
+            self.discover_wemo_ts = datetime.datetime.now()
+        # Check one device per program scan until all are checked
+        if self.dev_ptr < (len(self.devices) - 1):
+            self.dev_ptr += 1
+            # If device is a wemo device, search list of previously discovered
+            # wemo devices for a device name match
+            if 'wemo' in self.devices[self.dev_ptr].dev_type:
+                self.match = self.gateway.search_by_name(
+                    self.devices[self.dev_ptr].dev_name
+                )
+                # If a match is found, the device was already discovered and 
+                # nothing more needs to be done
+                if self.match is not None:
+                    self.logger.debug(
+                        'Device %s already discovered',
+                        self.devices[self.dev_ptr].dev_name
+                    )
+                # Otherwise, run a targeted discovery for the device in question
+                else:
                     self.logger.debug(
                         'Device %s not previously discovered. Running discovery now',
-                        self.device.dev_name
+                        self.devices[self.dev_ptr].dev_name
                     )
                     self.gateway.discover(
-                        self.device.dev_name,
-                        self.device.dev_addr
+                        self.devices[self.dev_ptr].dev_name,
+                        self.devices[self.dev_ptr].dev_addr
                     )
 
 
@@ -137,7 +164,10 @@ class MainTask(object):
                 self.sleep_time = 0.01
                 self.logger.debug('Getting Incoming message from queue')
                 self.next_msg = self.msg_in_queue.get_nowait()
-                self.logger.debug('Message pulled from queue: [%s]', self.next_msg)
+                self.logger.debug(
+                    'Message pulled from queue: [%s]',
+                    self.next_msg
+                )
 
                 # Determine message type
                 self.next_msg_split = self.next_msg.split(',')
@@ -146,9 +176,18 @@ class MainTask(object):
                     self.msg_source_addr = self.next_msg_split[3]
                     self.msg_source_port = self.next_msg_split[4]
                     self.msg_type = self.next_msg_split[5]
-                    self.logger.debug('Source Address: %s', self.msg_source_addr)
-                    self.logger.debug('Source Port: %s', self.msg_source_addr)
-                    self.logger.debug('Message Type: %s', self.msg_type)
+                    self.logger.debug(
+                        'Source Address: %s',
+                        self.msg_source_addr
+                    )
+                    self.logger.debug(
+                        'Source Port: %s',
+                        self.msg_source_addr
+                    )
+                    self.logger.debug(
+                        'Message Type: %s',
+                        self.msg_type
+                    )
 
                 # Process heartbeat from remote service
                 if self.msg_type == self.message_types['heartbeat']:
@@ -157,7 +196,8 @@ class MainTask(object):
                         self.logger,
                         self.ref_num,
                         self.next_msg,
-                        self.message_types)
+                        self.message_types
+                    )
 
                 # Wemo Device Status Queries
                 if self.msg_type == self.message_types['get_device_state']:
@@ -167,7 +207,8 @@ class MainTask(object):
                         self.ref_num,
                         self.gateway,
                         self.next_msg,
-                        self.message_types)
+                        self.message_types
+                    )
 
                 # Wemo Device set state commands
                 if self.msg_type == self.message_types['set_device_state']:
@@ -177,14 +218,18 @@ class MainTask(object):
                         self.ref_num,
                         self.gateway,
                         self.next_msg,
-                        self.message_types)
+                        self.message_types
+                    )
 
                 # Que up response messages in outgoing msg que
                 if len(self.out_msg_list) > 0:
-                    self.logger.debug('Queueing response message(s)')
+                    self.logger.debug('Queueing outgoing message(s)')
                     for self.out_msg in self.out_msg_list:
                         self.msg_out_queue.put_nowait(copy.copy(self.out_msg))
-                        self.logger.debug('Message [%s] successfully queued', self.out_msg)
+                        self.logger.debug(
+                            'Message [%s] successfully queued',
+                            self.out_msg
+                        )
 
 
             # PERIODIC TASKS
@@ -192,7 +237,8 @@ class MainTask(object):
             if datetime.datetime.now() >= (self.last_check_hb + datetime.timedelta(seconds=60)):
                 self.destinations = [
                     (self.service_addresses['automation_addr'],
-                     self.service_addresses['automation_port'])
+                     self.service_addresses['automation_port']
+                    )
                 ]
                 self.out_msg_list = create_heartbeat_msg(
                     self.logger,
@@ -204,11 +250,13 @@ class MainTask(object):
 
                 # Que up response messages in outgoing msg que
                 if len(self.out_msg_list) > 0:
-                    self.logger.debug('Queueing response message(s)')
+                    self.logger.debug('Queueing outgoing message(s)')
                     for self.out_msg in self.out_msg_list:
                         self.msg_out_queue.put_nowait(copy.copy(self.out_msg))
-                        self.logger.debug('Response message [%s] successfully queued',
-                                          self.out_msg)
+                        self.logger.debug(
+                            'Message [%s] successfully queued',
+                            self.out_msg
+                        )
 
                 # Update last-check
                 self.last_check_hb = datetime.datetime.now()
@@ -216,9 +264,7 @@ class MainTask(object):
 
             # WEMO DEVICE DISCOVERY
             # Search Network for any devices not previously discovered
-            if datetime.datetime.now() >= (self.discover_wemo_ts + datetime.timedelta(minutes=5)):
-                self.discover_wemo()
-                self.discover_wemo_ts = datetime.datetime.now()
+            yield from self.discover_wemo()
 
 
             # Yield to other tasks for a while

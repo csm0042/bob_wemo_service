@@ -49,6 +49,15 @@ class WemoAPI(object):
         return self._wemo_known
 
 
+    def search_by_name(self, name):
+        self.logger.debug('Starting search of wemo table for matching name: %s', name)
+        for i, d in enumerate(self._wemo_known):
+            if name.lower() == d.name.lower():
+                self.logger.debug('Match found at index: %s', i)
+                return i
+        self.logger.debug('No match found for device name: %s', name)
+        return None
+
 
     def discover(self, name, address):
         """ discovers wemo device on network based upon known IP address """

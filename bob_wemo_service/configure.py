@@ -197,6 +197,7 @@ class ConfigureService(object):
                 self.rule_key = self.device_id + '_rule'
                 self.devices.append(
                     Device(
+                        logger=self.logger,
                         dev_name=self.config_file['DEVICES'][self.name_key],
                         dev_type=self.config_file['DEVICES'][self.type_key],
                         dev_addr=self.config_file['DEVICES'][self.addr_key],

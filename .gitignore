@@ -99,3 +99,6 @@ ENV/
 
 # mypy
 .mypy_cache/
+.vs/slnx.sqlite
+.vs/VSWorkspaceState.json
+.vs/bob_wemo_service/v15/.suo

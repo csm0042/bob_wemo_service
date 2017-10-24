@@ -5,7 +5,6 @@
 # Import Required Libraries (Standard, Third Party, Local) ********************
 import asyncio
 from contextlib import suppress
-import logging
 import os
 import sys
 if __name__ == "__main__":
@@ -30,10 +29,10 @@ __status__ = "Development"
 
 
 # Application wide objects ****************************************************
-parent_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-config_file = os.path.join(parent_path, 'config.ini')
-print("\n\nUsing Config file:\n" + config_file + "\n\n")
-SERVICE_CONFIG = ConfigureService(config_file)
+PARENT_PATH = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+CONFIG_FILE = os.path.join(PARENT_PATH, 'config.ini')
+print("\n\nUsing Config file:\n" + CONFIG_FILE + "\n\n")
+SERVICE_CONFIG = ConfigureService(CONFIG_FILE)
 LOGGER = SERVICE_CONFIG.get_logger()
 SERVICE_ADDRESSES = SERVICE_CONFIG.get_servers()
 MESSAGE_TYPES = SERVICE_CONFIG.get_message_types()
