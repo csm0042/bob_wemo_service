@@ -42,6 +42,7 @@ class WemoAPI(object):
 
     @property
     def wemo_known(self):
+        """ Return complete list of known devices """
         return self._wemo_known
 
 
@@ -55,10 +56,10 @@ class WemoAPI(object):
             name
         )
         # Search table of previously discovered devices
-        for i, d in enumerate(self._wemo_known):
-            if name.lower() == d.name.lower():
+        for i, device in enumerate(self._wemo_known):
+            if name.lower() == device.name.lower():
                 self.logger.debug('Match found at index: %s', i)
-                return d
+                return device
         # If not found, run a device-specific discovery
         self.logger.debug(
             'Device %s @ %s not previously discovered.  Running discovery',
