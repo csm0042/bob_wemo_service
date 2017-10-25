@@ -48,6 +48,7 @@ class MainTask(object):
         self.msg_type = str()
         self.destinations = []
         self.match = None
+        self.device = None
         self.devices = []
         self.dev_ptr = 0
         self.discover_wemo_ts = datetime.datetime.now() - datetime.timedelta(minutes=5)
@@ -99,7 +100,7 @@ class MainTask(object):
 
 
     @asyncio.coroutine
-    def discover_wemo(self):
+    def check_wemo(self):
         """ Searches network for devices configured but not previously discovered
         """
         # Reset the device pointer every 5 minutes to start a new discovery loop
@@ -108,36 +109,20 @@ class MainTask(object):
             self.dev_ptr >= (len(self.devices) - 1):
             self.dev_ptr = 0
             self.logger.debug(
-                'Checking list of discovered devices against configured '
-                'device list: %s', self.devices
+                'Updating status of configured devices in list: %s',
+                self.devices
             )
             self.discover_wemo_ts = datetime.datetime.now()
         # Check one device per program scan until all are checked
         if self.dev_ptr < (len(self.devices) - 1):
             self.dev_ptr += 1
-            # If device is a wemo device, search list of previously discovered
-            # wemo devices for a device name match
-            if 'wemo' in self.devices[self.dev_ptr].dev_type:
-                self.match = self.gateway.search_by_name(
-                    self.devices[self.dev_ptr].dev_name
+            self.device = self.devices[self.dev_ptr]
+            # If device is a wemo device, perform status query from device
+            if 'wemo' in self.device.dev_type:
+                self.device.dev_status, self.device.dev_last_seen = self.gateway.read_status(
+                    name=self.device.dev_name,
+                    addr=self.device.dev_addr
                 )
-                # If a match is found, the device was already discovered and
-                # nothing more needs to be done
-                if self.match is not None:
-                    self.logger.debug(
-                        'Device %s already discovered',
-                        self.devices[self.dev_ptr].dev_name
-                    )
-                # Otherwise, run a targeted discovery for the device in question
-                else:
-                    self.logger.debug(
-                        'Device %s not previously discovered. Running discovery now',
-                        self.devices[self.dev_ptr].dev_name
-                    )
-                    self.gateway.discover(
-                        self.devices[self.dev_ptr].dev_name,
-                        self.devices[self.dev_ptr].dev_addr
-                    )
 
 
     @asyncio.coroutine
@@ -224,39 +209,9 @@ class MainTask(object):
                         )
 
 
-            # PERIODIC TASKS
-            # Periodically send heartbeats to other services
-            if datetime.datetime.now() >= (self.last_check_hb + datetime.timedelta(seconds=60)):
-                self.destinations = [
-                    (self.service_addresses['automation_addr'],
-                     self.service_addresses['automation_port']
-                    )
-                ]
-                self.out_msg_list = create_heartbeat_msg(
-                    self.logger,
-                    self.ref_num,
-                    self.destinations,
-                    self.service_addresses['wemo_addr'],
-                    self.service_addresses['wemo_port'],
-                    self.message_types)
-
-                # Que up response messages in outgoing msg que
-                if len(self.out_msg_list) > 0:
-                    self.logger.debug('Queueing outgoing message(s)')
-                    for self.out_msg in self.out_msg_list:
-                        self.msg_out_queue.put_nowait(copy.copy(self.out_msg))
-                        self.logger.debug(
-                            'Message [%s] successfully queued',
-                            self.out_msg
-                        )
-
-                # Update last-check
-                self.last_check_hb = datetime.datetime.now()
-
-
             # WEMO DEVICE DISCOVERY
             # Search Network for any devices not previously discovered
-            yield from self.discover_wemo()
+            yield from self.check_wemo()
 
 
             # Yield to other tasks for a while

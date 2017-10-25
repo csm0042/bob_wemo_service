@@ -108,10 +108,9 @@ def get_wemo_state(logger, ref_num, wemo_gw, msg, message_types):
         message.dev_last_seen
     )
     dev_status_new, dev_last_seen_new = wemo_gw.read_status(
-        message.dev_name,
-        message.dev_addr,
-        message.dev_status,
-        message.dev_last_seen
+        name=message.dev_name,
+        addr=message.dev_addr,
+        last_seen=message.dev_last_seen
     )
 
     # Send response indicating query was executed
@@ -158,9 +157,9 @@ def set_wemo_state(logger, ref_num, wemo_gw, msg, message_types):
             message.dev_name
         )
         dev_status_new, dev_last_seen_new = wemo_gw.turn_on(
-            message.dev_name,
-            message.dev_addr,
-            message.dev_last_seen
+            name=message.dev_name,
+            addr=message.dev_addr,
+            last_seen=message.dev_last_seen
         )
 
     # Execute wemo off commands
@@ -170,9 +169,9 @@ def set_wemo_state(logger, ref_num, wemo_gw, msg, message_types):
             message.dev_name
         )
         dev_status_new, dev_last_seen_new = wemo_gw.turn_off(
-            message.dev_name,
-            message.dev_addr,
-            message.dev_last_seen
+            name=message.dev_name,
+            addr=message.dev_addr,
+            last_seen=message.dev_last_seen
         )
 
     # If command not valid, leave device un-changed
