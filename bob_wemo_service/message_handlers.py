@@ -56,7 +56,11 @@ class MessageHandler(object):
         self.message = self.data_in.decode()
         self.logger.debug('Extracting address from socket connection')
         self.addr = self.writer.get_extra_info('peername')
-        self.logger.debug('Received %r from %r', self.message, self.addr)
+        self.logger.debug(
+            'Received %r from %r',
+            self.message,
+            self.addr
+        )
 
         # Coping incoming message to message buffer
         self.logger.debug('Received message: %s', self.message)
@@ -68,7 +72,10 @@ class MessageHandler(object):
         self.logger.debug("ACK'ing message: %r", self.message)
         self.logger.debug('Splitting message into constituent parts')
         self.msg_seg = self.message.split(',')
-        self.logger.debug('Extracted msg sequence number: [%s]', self.msg_seg[0])
+        self.logger.debug(
+            'Extracted msg sequence number: [%s]',
+            self.msg_seg[0]
+        )
         self.ack_to_send = self.msg_seg[0].encode()
         self.logger.debug('Sending ACK: %s', self.ack_to_send)
         self.writer.write(self.ack_to_send)
@@ -85,16 +92,29 @@ class MessageHandler(object):
             self.sleep_time = 0.2
             if self.msg_out_queue.qsize() > 0:
                 self.sleep_time = 0.05
-                self.logger.debug('Pulling next outgoing message from queue')
+                self.logger.debug(
+                    'Pulling next outgoing message from queue'
+                )
                 self.msg_to_send = self.msg_out_queue.get_nowait()
-                self.logger.debug('Preparing to send message: %s', self.msg_to_send)
-                self.logger.debug('Extracting msg destination address and port')
+                self.logger.debug(
+                    'Preparing to send message: %s',
+                    self.msg_to_send
+                )
+                self.logger.debug(
+                    'Extracting msg destination address and port'
+                )
                 self.msg_seg_out = self.msg_to_send.split(',')
-                self.logger.debug('Opening outgoing connection to %s:%s',
-                                  self.msg_seg_out[1], self.msg_seg_out[2])
+                self.logger.debug(
+                    'Opening outgoing connection to %s:%s',
+                    self.msg_seg_out[1],
+                    self.msg_seg_out[2]
+                )
                 try:
                     self.reader_out, self.writer_out = yield from asyncio.open_connection(
-                        self.msg_seg_out[1], int(self.msg_seg_out[2]), loop=self.loop)
+                        self.msg_seg_out[1],
+                        int(self.msg_seg_out[2]),
+                        loop=self.loop
+                    )
                     self.logger.debug('Sending message: %s', self.msg_to_send)
                     self.writer_out.write(self.msg_to_send.encode())
 
@@ -105,7 +125,8 @@ class MessageHandler(object):
                     self.logger.debug('Closing socket')
                     self.writer_out.close()
                 except Exception:
-                    self.logger.warning('Could not open socket connection to '
-                                        'target')
+                    self.logger.warning(
+                        'Could not open socket connection to target'
+                    )
             # Yield to other tasks for a while
             yield from asyncio.sleep(self.sleep_time)
