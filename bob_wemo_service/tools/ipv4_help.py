@@ -5,7 +5,6 @@
 # Import Required Libraries (Standard, Third Party, Local) ********************
 import logging
 import re
-import sys
 
 
 # Authorship Info *************************************************************

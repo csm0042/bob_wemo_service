@@ -3,12 +3,7 @@
 """
 
 # Import Required Libraries (Standard, Third Party, Local) ********************
-import datetime
 import logging
-import os
-import sys
-if __name__ == "__main__":
-    sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from bob_wemo_service.tools.ipv4_help import check_ipv4
 from bob_wemo_service.tools.field_checkers import in_int_range
 from bob_wemo_service.tools.field_checkers import is_valid_datetime
