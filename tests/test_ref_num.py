@@ -11,7 +11,7 @@ import os
 import sys
 if __name__ == "__main__":
     sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
-from bob_wemo_service.tools.ref_num import RefNum
+from bob_wemo_service.ref_num import RefNum
 
 
 # Define test class ***********************************************************
@@ -22,7 +22,7 @@ class TestDst(unittest.TestCase):
         logging.basicConfig(stream=sys.stdout)
         self.log = logging.getLogger(__name__)
         self.log.level = logging.DEBUG
-        self.ref_num = RefNum(log=self.log)
+        self.ref_num = RefNum(logger=self.log)
         super(TestDst, self).__init__(*args, **kwargs)
 
 

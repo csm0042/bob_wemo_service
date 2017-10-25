@@ -12,7 +12,7 @@ import os
 import sys
 if __name__ == "__main__":
     sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
-from bob_wemo_service.tools.message_handlers import MessageHandler
+from bob_wemo_service.message_handlers import MessageHandler
 
 
 # Define test class ***********************************************************
@@ -26,7 +26,7 @@ class TestMessageHandler(unittest.TestCase):
         self.datetime = datetime.datetime
         self.datetime_str = str(self.datetime)
         self.loop = asyncio.get_event_loop()
-        self.mh = MessageHandler(self.log, self.loop)
+        self.mh = MessageHandler(self.loop, logger=self.log)
         super(TestMessageHandler, self).__init__(*args, **kwargs)
 
 
@@ -36,7 +36,7 @@ class TestMessageHandler(unittest.TestCase):
 
     def test_init(self):
         """ test class __init__ and input variables """
-        self.assertEqual(self.mh.log, self.log)
+        self.assertEqual(self.mh.logger, self.log)
         self.assertEqual(self.mh.loop, self.loop)
 
 

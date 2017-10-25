@@ -11,7 +11,7 @@ import os
 import sys
 if __name__ == "__main__":
     sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
-from bob_wemo_service.messages.set_device_state_ack import SetDeviceStateMessageACK
+from bob_wemo_service.set_device_state_ack import SetDeviceStateMessageACK
 
 
 # Define test class ***********************************************************

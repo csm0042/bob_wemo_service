@@ -11,8 +11,8 @@ import os
 import sys
 if __name__ == "__main__":
     sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
-from bob_wemo_service.tools.field_checkers import in_int_range
-from bob_wemo_service.tools.field_checkers import is_valid_datetime
+from bob_wemo_service.field_checkers import in_int_range
+from bob_wemo_service.field_checkers import is_valid_datetime
 
 
 # Define test class ***********************************************************
@@ -43,10 +43,10 @@ class TestFieldCheckers(unittest.TestCase):
     def test_in_int_range(self):
         """ test function which checks whether an input value is within a
             range of integers """
-        self.assertEqual(in_int_range(self.log, 202, 100, 999), True)
-        self.assertEqual(in_int_range(self.log, 202, 1000, 9999), False)
-        self.assertEqual(in_int_range(self.log, -1, 0, 999), False)
-        self.assertEqual(in_int_range(self.log, 202, 100, 199), False)
+        self.assertEqual(in_int_range(202, 100, 999, logger=self.log), True)
+        self.assertEqual(in_int_range(202, 1000, 9999, logger=self.log), False)
+        self.assertEqual(in_int_range(-1, 0, 999, logger=self.log), False)
+        self.assertEqual(in_int_range(202, 100, 199, logger=self.log), False)
 
 
     def test_is_valid_datetime1(self):
@@ -66,9 +66,9 @@ class TestFieldCheckers(unittest.TestCase):
 
         self.assertEqual(
             is_valid_datetime(
-                self.log,
                 self.dt_test_input,
-                self.dt_initial
+                self.dt_initial,
+                logger=self.log
             ),
             self.dt_check
         )
@@ -87,9 +87,9 @@ class TestFieldCheckers(unittest.TestCase):
 
         self.assertEqual(
             is_valid_datetime(
-                self.log,
                 self.dt_test_input,
-                self.dt_initial
+                self.dt_initial,
+                logger=self.log
             )[0:10],
             self.dt_check
         )
@@ -108,16 +108,16 @@ class TestFieldCheckers(unittest.TestCase):
 
         self.assertEqual(
             is_valid_datetime(
-                self.log,
                 self.dt_test_input,
-                self.dt_initial
+                self.dt_initial,
+                logger=self.log
             ),
             self.dt_check
         )
 
     def test_is_valid_datetime4(self):
         """ test Valid input (datetime string) and valid initial (datetime) value """
-        
+
         self.dt_initial = datetime.datetime.combine(
             datetime.date(2017, 1, 1),
             datetime.time(9, 4, 0)
@@ -130,9 +130,9 @@ class TestFieldCheckers(unittest.TestCase):
 
         self.assertEqual(
             is_valid_datetime(
-                self.log,
                 self.dt_test_input,
-                self.dt_initial
+                self.dt_initial,
+                logger=self.log
             ),
         self.dt_check
         )
@@ -150,9 +150,9 @@ class TestFieldCheckers(unittest.TestCase):
             )[:10]
         self.assertEqual(
             is_valid_datetime(
-                self.log,
                 self.dt_test_input,
-                self.dt_initial
+                self.dt_initial,
+                logger=self.log
             )[0:10],
             self.dt_check
         )
@@ -170,9 +170,9 @@ class TestFieldCheckers(unittest.TestCase):
             )[:19]
         self.assertEqual(
             is_valid_datetime(
-                self.log,
                 self.dt_test_input,
-                self.dt_initial
+                self.dt_initial,
+                logger=self.log
             ),
             self.dt_check
         )
@@ -190,9 +190,9 @@ class TestFieldCheckers(unittest.TestCase):
             )
         self.assertEqual(
             is_valid_datetime(
-                self.log,
                 self.dt_test_input,
-                self.dt_initial
+                self.dt_initial,
+                logger=self.log
             ),
             self.dt_check
         )
@@ -210,9 +210,9 @@ class TestFieldCheckers(unittest.TestCase):
             )   
         self.assertEqual(
             is_valid_datetime(
-                self.log,
                 self.dt_test_input,
-                self.dt_initial
+                self.dt_initial,
+                logger=self.log
             ),
             self.dt_check
         )
@@ -230,9 +230,9 @@ class TestFieldCheckers(unittest.TestCase):
             )
         self.assertEqual(
             is_valid_datetime(
-                self.log,
                 self.dt_test_input,
-                self.dt_initial
+                self.dt_initial,
+                logger=self.log
             ),
             self.dt_check
         )
@@ -250,9 +250,9 @@ class TestFieldCheckers(unittest.TestCase):
             )[:19]
         self.assertEqual(
             is_valid_datetime(
-                self.log,
                 self.dt_test_input,
-                self.dt_initial
+                self.dt_initial,
+                logger=self.log
             ),
             self.dt_check
         )
@@ -270,9 +270,9 @@ class TestFieldCheckers(unittest.TestCase):
             )[:19]        
         self.assertEqual(
             is_valid_datetime(
-                self.log,
                 self.dt_test_input,
-                self.dt_initial
+                self.dt_initial,
+                logger=self.log
             ),
             self.dt_check
         )
@@ -290,9 +290,9 @@ class TestFieldCheckers(unittest.TestCase):
             )[:19]        
         self.assertEqual(
             is_valid_datetime(
-                self.log,
                 self.dt_test_input,
-                self.dt_initial
+                self.dt_initial,
+                logger=self.log
             ),
             self.dt_check
         )
@@ -310,9 +310,9 @@ class TestFieldCheckers(unittest.TestCase):
             )[:19]        
         self.assertEqual(
             is_valid_datetime(
-                self.log,
                 self.dt_test_input,
-                self.dt_initial
+                self.dt_initial,
+                logger=self.log
             ),
             self.dt_check
         )
