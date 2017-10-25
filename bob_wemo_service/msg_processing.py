@@ -6,12 +6,12 @@
 import asyncio
 import copy
 import logging
-from bob_wemo_service.messages.heartbeat import HeartbeatMessage
-from bob_wemo_service.messages.heartbeat_ack import HeartbeatMessageACK
-from bob_wemo_service.messages.get_device_state import GetDeviceStateMessage
-from bob_wemo_service.messages.get_device_state_ack import GetDeviceStateMessageACK
-from bob_wemo_service.messages.set_device_state import SetDeviceStateMessage
-from bob_wemo_service.messages.set_device_state_ack import SetDeviceStateMessageACK
+from bob_wemo_service.heartbeat import HeartbeatMessage
+from bob_wemo_service.heartbeat_ack import HeartbeatMessageACK
+from bob_wemo_service.get_device_state import GetDeviceStateMessage
+from bob_wemo_service.get_device_state_ack import GetDeviceStateMessageACK
+from bob_wemo_service.set_device_state import SetDeviceStateMessage
+from bob_wemo_service.set_device_state_ack import SetDeviceStateMessageACK
 
 
 # Authorship Info *************************************************************

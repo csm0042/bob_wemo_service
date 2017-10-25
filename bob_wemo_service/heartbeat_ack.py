@@ -4,9 +4,9 @@
 
 # Import Required Libraries (Standard, Third Party, Local) ********************
 import logging
-from bob_wemo_service.tools.ipv4_help import check_ipv4
-from bob_wemo_service.tools.field_checkers import in_int_range
-from bob_wemo_service.tools.field_checkers import is_valid_datetime
+from bob_wemo_service.ipv4_help import check_ipv4
+from bob_wemo_service.field_checkers import in_int_range
+from bob_wemo_service.field_checkers import is_valid_datetime
 
 
 # Authorship Info *************************************************************
@@ -21,7 +21,7 @@ __status__ = "Development"
 
 
 # Message Class Definition ****************************************************
-class HeartbeatMessage(object):
+class HeartbeatMessageACK(object):
     """ Update Command message class and methods """
     def __init__(self, logger=None, **kwargs):
         # Configure loggers
@@ -93,11 +93,10 @@ class HeartbeatMessage(object):
         if check_ipv4(value, logger=self.logger) is True:
             self._dest_addr = str(value)
             self.logger.debug('Destination address updated to: '
-                               '%s', self._dest_addr)
+                              '%s', self._dest_addr)
         else:
             self.logger.warning('Destination address update failed with input value: '
                                 '%s', value)
-        
 
     # destination port ********************************************************
     @property

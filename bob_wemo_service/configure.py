@@ -9,7 +9,7 @@ import logging
 import logging.handlers
 import os
 import sys
-from bob_wemo_service.tools.device import Device
+from bob_wemo_service.device import Device
 
 
 # Authorship Info *************************************************************

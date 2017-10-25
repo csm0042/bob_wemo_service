@@ -4,9 +4,9 @@
 
 # Import Required Libraries (Standard, Third Party, Local) ********************
 import logging
-from bob_wemo_service.tools.ipv4_help import check_ipv4
-from bob_wemo_service.tools.field_checkers import in_int_range
-from bob_wemo_service.tools.field_checkers import is_valid_datetime
+from bob_wemo_service.ipv4_help import check_ipv4
+from bob_wemo_service.field_checkers import in_int_range
+from bob_wemo_service.field_checkers import is_valid_datetime
 
 
 # Authorship Info *************************************************************

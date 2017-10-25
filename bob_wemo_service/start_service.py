@@ -12,8 +12,8 @@ if __name__ == "__main__":
 from bob_wemo_service.configure import ConfigureService
 from bob_wemo_service.wemo import WemoAPI
 from bob_wemo_service.service_main import MainTask
-from bob_wemo_service.tools.ref_num import RefNum
-from bob_wemo_service.tools.message_handlers import MessageHandler
+from bob_wemo_service.ref_num import RefNum
+from bob_wemo_service.message_handlers import MessageHandler
 
 
 

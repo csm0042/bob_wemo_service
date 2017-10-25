@@ -1,12 +1,12 @@
 #!/usr/bin/python3
-""" message_gds_ack.py:
+""" message_sds.py:
 """
 
 # Import Required Libraries (Standard, Third Party, Local) ********************
 import logging
-from bob_wemo_service.tools.ipv4_help import check_ipv4
-from bob_wemo_service.tools.field_checkers import in_int_range
-from bob_wemo_service.tools.field_checkers import is_valid_datetime
+from bob_wemo_service.ipv4_help import check_ipv4
+from bob_wemo_service.field_checkers import in_int_range
+from bob_wemo_service.field_checkers import is_valid_datetime
 
 
 # Authorship Info *************************************************************
@@ -21,7 +21,7 @@ __status__ = "Development"
 
 
 # Message Class Definition ****************************************************
-class GetDeviceStateMessageACK(object):
+class SetDeviceStateMessage(object):
     """ Log Status Update message class and methods """
     def __init__(self, logger=None, **kwargs):
         # Configure loggers
@@ -34,6 +34,8 @@ class GetDeviceStateMessageACK(object):
         self._source_port = str()
         self._msg_type = str()
         self._dev_name = str()
+        self._dev_addr = str()
+        self._dev_cmd = str()
         self._dev_status = str()
         self._dev_last_seen = str()
         self.temp_list = []
@@ -72,6 +74,10 @@ class GetDeviceStateMessageACK(object):
                     self.dev_addr = value
                     self.logger.debug('Device Address value set during __init__ '
                                       'to: %s', self.dev_addr)
+                if key == "dev_cmd":
+                    self.dev_cmd = value
+                    self.logger.debug('Device Command value set during __init__ '
+                                      'to: %s', self.dev_cmd)
                 if key == "dev_status":
                     self.dev_status = value
                     self.logger.debug('Device Status value set during __init__ '
@@ -108,7 +114,7 @@ class GetDeviceStateMessageACK(object):
         if check_ipv4(value, logger=self.logger) is True:
             self._dest_addr = str(value)
             self.logger.debug('Destination address updated to: '
-                              '%s', self._dest_addr)
+                               '%s', self._dest_addr)
         else:
             self.logger.warning('Destination address update failed with input value: '
                                 '%s', value)
@@ -194,6 +200,39 @@ class GetDeviceStateMessageACK(object):
         self.logger.debug('Device name value updated to: '
                           '%s', self._dev_name)
 
+    # device address field ****************************************************
+    @property
+    def dev_addr(self):
+        self.logger.debug('Returning current value of device address: '
+                          '%s', self._dev_addr)
+        return self._dev_addr
+
+    @dev_addr.setter
+    def dev_addr(self, value):
+        if check_ipv4(value, logger=self.logger) is True:
+            self._dev_addr = value
+            self.logger.debug('Device address updated to: '
+                              '%s', self._dev_addr)
+        else:
+            self.logger.warning('Device address update failed with input value: '
+                                '%s', value)
+
+    # device command field ****************************************************
+    @property
+    def dev_cmd(self):
+        self.logger.debug('Returning current value of device cmd: '
+                          '%s', self._dev_cmd)
+        return self._dev_cmd
+
+    @dev_cmd.setter
+    def dev_cmd(self, value):
+        if isinstance(value, str):
+            self._dev_cmd = value.lower()
+        else:
+            self._dev_cmd = (str(value)).lower()
+        self.logger.debug('Device command value updated to: '
+                          '%s', self._dev_cmd)
+
     # device status field *****************************************************
     @property
     def dev_status(self):
@@ -229,22 +268,22 @@ class GetDeviceStateMessageACK(object):
     @property
     def complete(self):
         self.logger.debug('Returning current value of complete message: '
-                          '%s,%s,%s,%s,%s,%s,%s,%s,%s',
+                          '%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s',
                           self._ref, self._dest_addr, self._dest_port,
                           self._source_addr, self._source_port,
-                          self._msg_type, self._dev_name,
-                          self._dev_status, self._dev_last_seen)
-        return '%s,%s,%s,%s,%s,%s,%s,%s,%s' % (
+                          self._msg_type, self._dev_name, self._dev_addr,
+                          self._dev_cmd, self._dev_status, self._dev_last_seen)
+        return '%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s' % (
             self._ref, self._dest_addr, self._dest_port,
             self._source_addr, self._source_port,
-            self._msg_type, self._dev_name,
-            self._dev_status, self._dev_last_seen)
+            self._msg_type, self._dev_name, self._dev_addr,
+            self._dev_cmd, self._dev_status, self._dev_last_seen)
 
     @complete.setter
     def complete(self, value):
         if isinstance(value, str):
             self.temp_list = value.split(',')
-            if len(self.temp_list) >= 9:
+            if len(self.temp_list) >= 11:
                 self.logger.debug('Message was properly formatted for decoding')
                 self.ref = self.temp_list[0]
                 self.dest_addr = self.temp_list[1]
@@ -253,5 +292,7 @@ class GetDeviceStateMessageACK(object):
                 self.source_port = self.temp_list[4]
                 self.msg_type = self.temp_list[5]
                 self.dev_name = self.temp_list[6]
-                self.dev_status = self.temp_list[7]
-                self.dev_last_seen = self.temp_list[8]
+                self.dev_addr = self.temp_list[7]
+                self.dev_cmd = self.temp_list[8]
+                self.dev_status = self.temp_list[9]
+                self.dev_last_seen = self.temp_list[10]

@@ -6,7 +6,7 @@
 import datetime
 import logging
 import re
-from bob_wemo_service.tools.ipv4_help import check_ipv4
+from bob_wemo_service.ipv4_help import check_ipv4
 
 
 

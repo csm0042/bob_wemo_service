@@ -7,7 +7,7 @@ import copy
 import datetime
 import logging
 import pywemo
-from bob_wemo_service.tools.ipv4_help import check_ipv4
+from bob_wemo_service.ipv4_help import check_ipv4
 
 
 # Authorship Info *************************************************************

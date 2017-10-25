@@ -5,7 +5,7 @@
 # Import Required Libraries (Standard, Third Party, Local) ********************
 import datetime
 import logging
-from bob_wemo_service.tools.ipv4_help import check_ipv4
+from bob_wemo_service.ipv4_help import check_ipv4
 
 
 # Authorship Info *************************************************************
