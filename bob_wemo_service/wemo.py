@@ -35,7 +35,7 @@ class WemoAPI(object):
         self.result = None
         self.status = str()
         self.logger.info('Performing initial scan for wemo devices on network')
-        #self._wemo_known = pywemo.discover_devices()
+        self._wemo_known = pywemo.discover_devices()
         for device in self._wemo_known:
             self.logger.info('Found: %s', device)
 
